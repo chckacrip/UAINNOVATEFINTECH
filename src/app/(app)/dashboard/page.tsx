@@ -7,7 +7,6 @@ import { computeMonthlySummary, detectRecurring, computeFinancialScore } from "@
 import { detectAnomalies } from "@/lib/anomaly";
 import { exportToCSV, exportToPrintPDF, exportMonthlyReportPDF } from "@/lib/export";
 import {
-  Loader2,
   TrendingUp,
   TrendingDown,
   DollarSign,
@@ -73,7 +72,8 @@ export default function DashboardPage() {
       setGoals((profileRes.data?.goals as Goal[]) ?? []);
       setBudgetRollover((profileRes.data?.budget_rollover as Record<string, boolean>) ?? {});
       setBillReminders((remindersRes.data as BillReminder[]) ?? []);
-      const rec = (profileRes.data?.recurring_income as { name?: string; amount: number; frequency: string }[]) ?? [];
+      const rawRec = (profileRes.data?.recurring_income as { name?: string; amount: number; frequency: string }[]) ?? [];
+      const rec = rawRec.map((r) => ({ name: r.name ?? "", amount: r.amount, frequency: r.frequency }));
       setRecurringIncomeList(rec);
       const monthly = rec.reduce((s, r) => {
         if (r.frequency === "weekly") return s + r.amount * (52 / 12);
@@ -176,8 +176,8 @@ export default function DashboardPage() {
   }
 
   const budgetAlerts = Object.entries(effectiveBudgets)
-    .filter(([_, limit]) => limit > 0)
-    .map((cat) => ({ cat, spent: (displaySummary.by_category[cat] || 0), limit: effectiveBudgets[cat] }))
+    .filter(([, limit]) => limit > 0)
+    .map(([cat, limit]) => ({ cat, spent: (displaySummary.by_category[cat] || 0), limit }))
     .filter(({ spent, limit }) => limit > 0 && spent / limit >= 0.8)
     .sort((a, b) => b.spent / b.limit - a.spent / a.limit);
 

@@ -535,8 +535,13 @@ function PlaidLinkButton() {
           institution: metadata?.institution,
         }),
       })
-        .then((r) => r.json())
-        .then((data) => {
+        .then(async (r) => {
+          const data = await r.json().catch(() => ({}));
+          if (!r.ok) {
+            setStatus("error");
+            setMessage(data?.error || `Request failed (${r.status}). Check your connection and try again.`);
+            return;
+          }
           if (data.success) {
             setStatus("success");
             setMessage(`Connected to ${data.institution || "bank"}! Synced ${data.synced} transactions.`);
@@ -545,9 +550,14 @@ function PlaidLinkButton() {
             setMessage(data.error || "Exchange failed.");
           }
         })
-        .catch(() => {
+        .catch((err: unknown) => {
           setStatus("error");
-          setMessage("Connection failed.");
+          const msg = err instanceof Error ? err.message : "Connection failed.";
+          setMessage(
+            msg.includes("fetch") || msg.includes("Network") || msg.includes("Failed to fetch")
+              ? "Connection failed. Check your network and that the app is running, then try again."
+              : msg
+          );
         });
     }} onExit={() => {
       setStatus("idle");

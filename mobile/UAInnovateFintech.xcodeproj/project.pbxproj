@@ -21,6 +21,21 @@
 		B1000000000000000000000C /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000C /* ProfileView.swift */; };
 		B1000000000000000000000D /* Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000D /* Config.plist */; };
 		B1000000000000000000000F /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = P10000000000000000000001 /* Supabase */; };
+		B10000000000000000000010 /* RecurringHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000011 /* RecurringHelper.swift */; };
+		B1000000000000000000001D /* DashboardHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000020 /* DashboardHelper.swift */; };
+		B10000000000000000000011 /* TaxEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000012 /* TaxEstimator.swift */; };
+		B10000000000000000000012 /* TagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000013 /* TagsView.swift */; };
+		B10000000000000000000013 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000014 /* SearchView.swift */; };
+		B10000000000000000000014 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000015 /* CalendarView.swift */; };
+		B10000000000000000000015 /* SubscriptionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000016 /* SubscriptionsView.swift */; };
+		B10000000000000000000016 /* NetWorthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000017 /* NetWorthView.swift */; };
+		B10000000000000000000017 /* DebtView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000018 /* DebtView.swift */; };
+		B10000000000000000000018 /* TaxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000019 /* TaxView.swift */; };
+		B10000000000000000000019 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000001A /* ChatView.swift */; };
+		B1000000000000000000001A /* HouseholdView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000001B /* HouseholdView.swift */; };
+		B1000000000000000000001B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000001C /* SettingsView.swift */; };
+		B1000000000000000000001C /* MoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000001D /* MoreView.swift */; };
+		B1000000000000000000001E /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000001E /* AppTheme.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +52,21 @@
 		F1000000000000000000000B /* UploadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadView.swift; sourceTree = "<group>"; };
 		F1000000000000000000000C /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		F1000000000000000000000D /* Config.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Config.plist; sourceTree = "<group>"; };
+		F10000000000000000000011 /* RecurringHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringHelper.swift; sourceTree = "<group>"; };
+		F10000000000000000000020 /* DashboardHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardHelper.swift; sourceTree = "<group>"; };
+		F10000000000000000000012 /* TaxEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxEstimator.swift; sourceTree = "<group>"; };
+		F10000000000000000000013 /* TagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagsView.swift; sourceTree = "<group>"; };
+		F10000000000000000000014 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
+		F10000000000000000000015 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
+		F10000000000000000000016 /* SubscriptionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionsView.swift; sourceTree = "<group>"; };
+		F10000000000000000000017 /* NetWorthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetWorthView.swift; sourceTree = "<group>"; };
+		F10000000000000000000018 /* DebtView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebtView.swift; sourceTree = "<group>"; };
+		F10000000000000000000019 /* TaxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxView.swift; sourceTree = "<group>"; };
+		F1000000000000000000001A /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
+		F1000000000000000000001B /* HouseholdView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HouseholdView.swift; sourceTree = "<group>"; };
+		F1000000000000000000001C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		F1000000000000000000001D /* MoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreView.swift; sourceTree = "<group>"; };
+		F1000000000000000000001E /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		F1000000000000000000000E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F10000000000000000000010 /* UAInnovateFintech.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UAInnovateFintech.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -70,11 +100,20 @@
 				G10000000000000000000005 /* Services */,
 				G10000000000000000000006 /* Models */,
 				G10000000000000000000007 /* Auth */,
+				G10000000000000000000009 /* Theme */,
 				G10000000000000000000008 /* Views */,
 				F1000000000000000000000D /* Config.plist */,
 				F1000000000000000000000E /* Info.plist */,
 			);
 			path = UAInnovateFintech;
+			sourceTree = "<group>";
+		};
+		G10000000000000000000009 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				F1000000000000000000001E /* AppTheme.swift */,
+			);
+			path = Theme;
 			sourceTree = "<group>";
 		};
 		G10000000000000000000003 /* Products */ = {
@@ -98,6 +137,9 @@
 			children = (
 				F10000000000000000000004 /* SupabaseService.swift */,
 				F10000000000000000000005 /* BackendAPIClient.swift */,
+				F10000000000000000000011 /* RecurringHelper.swift */,
+				F10000000000000000000012 /* TaxEstimator.swift */,
+				F10000000000000000000020 /* DashboardHelper.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -126,6 +168,17 @@
 				F1000000000000000000000A /* TransactionsView.swift */,
 				F1000000000000000000000B /* UploadView.swift */,
 				F1000000000000000000000C /* ProfileView.swift */,
+				F1000000000000000000001D /* MoreView.swift */,
+				F10000000000000000000014 /* SearchView.swift */,
+				F10000000000000000000015 /* CalendarView.swift */,
+				F10000000000000000000016 /* SubscriptionsView.swift */,
+				F10000000000000000000017 /* NetWorthView.swift */,
+				F10000000000000000000018 /* DebtView.swift */,
+				F10000000000000000000019 /* TaxView.swift */,
+				F10000000000000000000013 /* TagsView.swift */,
+				F1000000000000000000001A /* ChatView.swift */,
+				F1000000000000000000001B /* HouseholdView.swift */,
+				F1000000000000000000001C /* SettingsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -212,6 +265,21 @@
 				B1000000000000000000000A /* TransactionsView.swift in Sources */,
 				B1000000000000000000000B /* UploadView.swift in Sources */,
 				B1000000000000000000000C /* ProfileView.swift in Sources */,
+				B10000000000000000000010 /* RecurringHelper.swift in Sources */,
+				B1000000000000000000001D /* DashboardHelper.swift in Sources */,
+				B10000000000000000000011 /* TaxEstimator.swift in Sources */,
+				B10000000000000000000012 /* TagsView.swift in Sources */,
+				B10000000000000000000013 /* SearchView.swift in Sources */,
+				B10000000000000000000014 /* CalendarView.swift in Sources */,
+				B10000000000000000000015 /* SubscriptionsView.swift in Sources */,
+				B10000000000000000000016 /* NetWorthView.swift in Sources */,
+				B10000000000000000000017 /* DebtView.swift in Sources */,
+				B10000000000000000000018 /* TaxView.swift in Sources */,
+				B10000000000000000000019 /* ChatView.swift in Sources */,
+				B1000000000000000000001A /* HouseholdView.swift in Sources */,
+				B1000000000000000000001B /* SettingsView.swift in Sources */,
+				B1000000000000000000001C /* MoreView.swift in Sources */,
+				B1000000000000000000001E /* AppTheme.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -22,7 +22,7 @@ export default function SubscriptionsPage() {
         supabase.from("profiles").select("subscription_notes, subscription_price_history").eq("id", user.id).single(),
       ]);
       setTransactions((txRes.data as Transaction[]) ?? []);
-      setNotes((profileRes.data?.subscription_notes as Record<string, string>) ?? {});
+      setNotes((profileRes.data?.subscription_notes as Record<string, "keep" | "cancel" | "">) ?? {});
       setPriceHistory((profileRes.data?.subscription_price_history as Record<string, { date: string; amount: number }[]>) ?? {});
       setLoading(false);
     };

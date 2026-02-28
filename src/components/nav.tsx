@@ -13,7 +13,6 @@ import {
   LogOut,
   Settings,
   List,
-  CalendarDays,
   PiggyBank,
   Calculator,
   Users,
@@ -22,25 +21,24 @@ import {
   Menu,
   X,
   Plus,
-  Tag,
-  Search,
+  MoreHorizontal,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { QuickAddTransaction } from "./quick-add-transaction";
 import { ShortcutsHelp } from "./shortcuts-help";
 
-const NAV_ITEMS = [
+const MAIN_NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/search", label: "Search", icon: Search },
+  { href: "/chat", label: "Chat", icon: MessageSquare },
   { href: "/transactions", label: "Transactions", icon: List },
-  { href: "/upload", label: "Upload", icon: Upload },
-  { href: "/calendar", label: "Bills", icon: CalendarDays },
   { href: "/subscriptions", label: "Subscriptions", icon: RefreshCw },
+  { href: "/upload", label: "Upload", icon: Upload },
+];
+
+const BURGER_NAV = [
   { href: "/net-worth", label: "Net Worth", icon: PiggyBank },
   { href: "/debt", label: "Debt", icon: CreditCard },
   { href: "/tax", label: "Tax", icon: Calculator },
-  { href: "/tags", label: "Tags", icon: Tag },
-  { href: "/chat", label: "Chat", icon: MessageSquare },
   { href: "/household", label: "Household", icon: Users },
   { href: "/onboarding", label: "Settings", icon: Settings },
 ];
@@ -49,8 +47,18 @@ export function AppNav() {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [burgerOpen, setBurgerOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [shortcutsHelpOpen, setShortcutsHelpOpen] = useState(false);
+  const burgerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const closeBurger = (e: MouseEvent) => {
+      if (burgerRef.current && !burgerRef.current.contains(e.target as Node)) setBurgerOpen(false);
+    };
+    if (burgerOpen) document.addEventListener("click", closeBurger);
+    return () => document.removeEventListener("click", closeBurger);
+  }, [burgerOpen]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -84,7 +92,7 @@ export function AppNav() {
             <span className="font-bold text-slate-900 dark:text-white hidden sm:inline">FinanceCopilot</span>
           </Link>
           <div className="hidden lg:flex items-center gap-0.5 overflow-x-auto">
-            {NAV_ITEMS.map((item) => {
+            {MAIN_NAV.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link key={item.href} href={item.href} className={linkClass(isActive)}>
@@ -105,6 +113,35 @@ export function AppNav() {
           >
             <Plus className="h-5 w-5" />
           </button>
+          <div className="relative" ref={burgerRef}>
+            <button
+              type="button"
+              onClick={() => setBurgerOpen((o) => !o)}
+              className="rounded-lg p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+              aria-label="More"
+              title="More"
+            >
+              <MoreHorizontal className="h-5 w-5" />
+            </button>
+            {burgerOpen && (
+              <div className="absolute right-0 top-full mt-1 py-1 w-48 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg z-50">
+                {BURGER_NAV.map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setBurgerOpen(false)}
+                      className={linkClass(isActive) + " flex w-full px-3 py-2"}
+                    >
+                      <item.icon className="h-3.5 w-3.5" />
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
           <button
             type="button"
             onClick={() => setMobileOpen((o) => !o)}
@@ -127,7 +164,22 @@ export function AppNav() {
       {mobileOpen && (
         <div className="lg:hidden border-t border-slate-200 dark:border-slate-700 px-4 py-3 bg-slate-50 dark:bg-slate-800/50">
           <div className="flex flex-col gap-0.5">
-            {NAV_ITEMS.map((item) => {
+            {MAIN_NAV.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={linkClass(isActive)}
+                >
+                  <item.icon className="h-3.5 w-3.5" />
+                  {item.label}
+                </Link>
+              );
+            })}
+            <div className="border-t border-slate-200 dark:border-slate-600 my-1 pt-1" />
+            {BURGER_NAV.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link

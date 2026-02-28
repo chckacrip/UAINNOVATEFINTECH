@@ -1,32 +1,15 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useState, useMemo } from "react";
 import { Transaction } from "@/lib/types";
 import { detectRecurring } from "@/lib/summary";
 import Link from "next/link";
-import { Loader2, ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 
-export default function CalendarPage() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [loading, setLoading] = useState(true);
+type Props = { transactions: Transaction[] };
+
+export function TransactionsCalendarView({ transactions }: Props) {
   const [viewDate, setViewDate] = useState(new Date());
-
-  useEffect(() => {
-    const load = async () => {
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await supabase
-        .from("transactions")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("posted_at", { ascending: false });
-      setTransactions((data as Transaction[]) ?? []);
-      setLoading(false);
-    };
-    load();
-  }, []);
 
   const recurring = useMemo(() => detectRecurring(transactions), [transactions]);
 
@@ -48,7 +31,6 @@ export default function CalendarPage() {
       const nextDate = new Date(lastDate);
       nextDate.setDate(nextDate.getDate() + r.frequency_days);
 
-      // Project forward into the viewed month
       while (nextDate < new Date(year, month, 1)) {
         nextDate.setDate(nextDate.getDate() + r.frequency_days);
       }
@@ -59,7 +41,6 @@ export default function CalendarPage() {
         map[day].push({ merchant: r.merchant, amount: r.avg_amount, category: r.category });
       }
     }
-    // Also add actual transactions for this month
     for (const t of transactions) {
       const d = new Date(t.posted_at);
       if (d.getMonth() === month && d.getFullYear() === year && t.amount < 0) {
@@ -87,34 +68,19 @@ export default function CalendarPage() {
     return upcoming;
   }, [billsByDay, today, month, year, daysInMonth]);
 
-  if (loading) {
-    return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>;
-  }
-
   if (transactions.length === 0) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Bill Calendar</h1>
-          <p className="text-slate-600 dark:text-slate-400 text-sm">Track recurring bills and upcoming payments.</p>
-        </div>
-        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 text-center">
-          <CalendarDays className="h-12 w-12 text-slate-400 mx-auto mb-3" />
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">No transactions yet</h2>
-          <p className="text-slate-600 dark:text-slate-400 mb-4">Upload statements so we can detect recurring bills and show them on the calendar.</p>
-          <Link href="/upload" className="inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Upload CSV</Link>
-        </div>
+      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 text-center">
+        <CalendarDays className="h-12 w-12 text-slate-400 mx-auto mb-3" />
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">No transactions yet</h2>
+        <p className="text-slate-600 dark:text-slate-400 mb-4">Upload statements so we can show bills on the calendar.</p>
+        <Link href="/upload" className="inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Upload CSV</Link>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Bill Calendar</h1>
-        <p className="text-slate-600 dark:text-slate-400 text-sm">Track recurring bills and upcoming payments.</p>
-      </div>
-
       {upcomingBills.length > 0 && (
         <div className="rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 p-4">
           <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">Upcoming in 7 days</h3>

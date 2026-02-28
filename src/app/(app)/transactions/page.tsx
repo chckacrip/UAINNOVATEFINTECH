@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Transaction, CATEGORIES, FilterPreset } from "@/lib/types";
 import {
-  Loader2,
   Search,
   ChevronUp,
   ChevronDown,
@@ -17,18 +16,21 @@ import {
   Split,
   Plus,
   Trash2,
+  List,
+  CalendarDays,
 } from "lucide-react";
 import Link from "next/link";
 import { exportToCSV } from "@/lib/export";
 import { TransactionsSkeleton } from "@/components/skeleton";
 import { useToast } from "@/contexts/toast";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { TransactionsCalendarView } from "@/components/transactions-calendar-view";
 
 type SortKey = "posted_at" | "amount" | "merchant" | "category";
 type SortDir = "asc" | "desc";
 const PAGE_SIZE = 50;
 
-export default function TransactionsPage() {
+function TransactionsPageContent() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [customCategories, setCustomCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +38,14 @@ export default function TransactionsPage() {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const searchParams = useSearchParams();
+  const viewTab = (searchParams.get("view") === "calendar" ? "calendar" : "list") as "list" | "calendar";
+  const setViewTab = (v: "list" | "calendar") => {
+    const u = new URLSearchParams(searchParams.toString());
+    if (v === "list") u.delete("view"); else u.set("view", "calendar");
+    window.history.replaceState(null, "", `${window.location.pathname}${u.toString() ? "?" + u.toString() : ""}`);
+  };
+  const tabActiveClass = (tab: "list" | "calendar") =>
+    viewTab === tab ? "bg-white dark:bg-slate-700 shadow text-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-400";
   const [tagFilter, setTagFilter] = useState("");
   const TAX_TAG = "tax-deductible";
   const [dateFrom, setDateFrom] = useState("");
@@ -171,7 +181,7 @@ export default function TransactionsPage() {
       if (!map.has(k)) map.set(k, []);
       map.get(k)!.push(t);
     }
-    return [...map.values()].filter((g) => g.length > 1);
+    return Array.from(map.values()).filter((g) => g.length > 1);
   }, [transactions]);
 
   useEffect(() => { setPage(0); }, [search, categoryFilter, tagFilter, dateFrom, dateTo, amountMin, amountMax]);
@@ -299,7 +309,7 @@ export default function TransactionsPage() {
     if (selectedIds.size === 0) return;
     setBulkSaving(true);
     const supabase = createClient();
-    for (const id of selectedIds) {
+    for (const id of Array.from(selectedIds)) {
       const t = transactions.find((x) => x.id === id);
       if (!t) continue;
       const updates: Record<string, unknown> = {};
@@ -360,15 +370,41 @@ export default function TransactionsPage() {
 
   if (transactions.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="rounded-full bg-slate-100 p-4 mb-4">
-          <FileText className="h-8 w-8 text-slate-400" />
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Transactions</h1>
+          <div className="flex rounded-lg border border-slate-200 dark:border-slate-700 p-0.5 bg-slate-100 dark:bg-slate-800">
+            <button type="button" onClick={() => setViewTab("list")} className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium ${tabActiveClass("list")}`}><List className="h-3.5 w-3.5" /> List</button>
+            <button type="button" onClick={() => setViewTab("calendar")} className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium ${tabActiveClass("calendar")}`}><CalendarDays className="h-3.5 w-3.5" /> Calendar</button>
+          </div>
         </div>
-        <h2 className="text-xl font-semibold text-slate-900 mb-2">No transactions yet</h2>
-        <p className="text-slate-600 mb-6">Upload your bank statements to see transactions here.</p>
-        <Link href="/upload" className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
-          Upload Statements
-        </Link>
+        {viewTab === "calendar" ? <TransactionsCalendarView transactions={[]} /> : (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="rounded-full bg-slate-100 p-4 mb-4">
+              <FileText className="h-8 w-8 text-slate-400" />
+            </div>
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">No transactions yet</h2>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">Upload your bank statements to see transactions here.</p>
+            <Link href="/upload" className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
+              Upload Statements
+            </Link>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (viewTab === "calendar") {
+    return (
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Transactions</h1>
+          <div className="flex rounded-lg border border-slate-200 dark:border-slate-700 p-0.5 bg-slate-100 dark:bg-slate-800">
+            <button type="button" onClick={() => setViewTab("list")} className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium ${tabActiveClass("list")}`}><List className="h-3.5 w-3.5" /> List</button>
+            <button type="button" onClick={() => setViewTab("calendar")} className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium ${tabActiveClass("calendar")}`}><CalendarDays className="h-3.5 w-3.5" /> Calendar</button>
+          </div>
+        </div>
+        <TransactionsCalendarView transactions={transactions} />
       </div>
     );
   }
@@ -379,6 +415,10 @@ export default function TransactionsPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Transactions</h1>
           <p className="text-slate-600 dark:text-slate-400 text-sm">{transactions.length} total · {filtered.length} shown</p>
+        </div>
+        <div className="flex rounded-lg border border-slate-200 dark:border-slate-700 p-0.5 bg-slate-100 dark:bg-slate-800">
+          <button type="button" onClick={() => setViewTab("list")} className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium ${tabActiveClass("list")}`}><List className="h-3.5 w-3.5" /> List</button>
+          <button type="button" onClick={() => setViewTab("calendar")} className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium ${tabActiveClass("calendar")}`}><CalendarDays className="h-3.5 w-3.5" /> Calendar</button>
         </div>
       </div>
 
@@ -731,5 +771,13 @@ export default function TransactionsPage() {
         onCancel={() => setConfirmMassRemoveDuplicates(false)}
       />
     </div>
+  );
+}
+
+export default function TransactionsPage() {
+  return (
+    <Suspense fallback={<TransactionsSkeleton />}>
+      <TransactionsPageContent />
+    </Suspense>
   );
 }

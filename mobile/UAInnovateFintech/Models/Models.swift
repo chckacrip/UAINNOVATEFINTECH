@@ -33,6 +33,28 @@ struct Profile: Codable {
     var custom_categories: [String]?
     var recurring_income: [RecurringIncomeItem]?
     var budget_rollover: [String: Bool]?
+    var subscription_notes: [String: String]?
+    var subscription_price_history: [String: [PriceHistoryEntry]]?
+    var net_worth_target_amount: Double?
+    var net_worth_target_date: String?
+    var digest_enabled: Bool?
+    var report_schedule: ReportSchedule?
+    var merchant_rules: [MerchantRule]?
+}
+
+struct ReportSchedule: Codable {
+    var enabled: Bool
+    var frequency: String
+}
+
+struct MerchantRule: Codable {
+    var pattern: String
+    var category: String
+}
+
+struct PriceHistoryEntry: Codable {
+    let date: String
+    let amount: Double
 }
 
 struct Goal: Codable {
@@ -95,4 +117,55 @@ struct ChatRequest: Codable {
 struct ChatResponse: Codable {
     let answer: String?
     let error: String?
+}
+
+struct ChatPostResponse: Codable {
+    let response: AnalystResponse?
+}
+
+struct AnalystResponse: Codable {
+    let explanation: String?
+}
+
+struct ChatMessage: Codable, Identifiable {
+    let id: String
+    let user_id: String?
+    let role: String
+    let content: String
+    let created_at: String?
+}
+
+struct Asset: Codable, Identifiable {
+    let id: String
+    let user_id: String
+    let name: String
+    let asset_type: String
+    let value: Double
+}
+
+struct Liability: Codable, Identifiable {
+    let id: String
+    let user_id: String
+    let name: String
+    let liability_type: String
+    let balance: Double
+    let interest_rate: Double
+    let minimum_payment: Double?
+}
+
+struct NetWorthSnapshot: Codable, Identifiable {
+    let id: String
+    let user_id: String
+    let snapshot_month: String
+    let assets_total: Double
+    let liabilities_total: Double
+}
+
+struct RecurringItem: Identifiable {
+    let merchant: String
+    let avg_amount: Double
+    let frequency_days: Int
+    let occurrences: Int
+    let category: String
+    var id: String { merchant }
 }

@@ -91,25 +91,33 @@ final class BackendAPIClient {
     }
 
     func createHousehold(name: String, accessToken: String?) async throws -> HouseholdResponse {
-        let body = try JSONEncoder().encode(["action": "create", "name": name])
+        struct Body: Encodable { let action = "create"; let name: String }
+        let body = try JSONEncoder().encode(Body(name: name))
         return try await request(path: "api/household", method: "POST", body: body, accessToken: accessToken)
     }
 
     func inviteHousehold(householdId: String, email: String, accessToken: String?) async throws {
-        let body = try JSONEncoder().encode(["action": "invite", "household_id": householdId, "email": email])
+        struct Body: Encodable { let action = "invite"; let household_id: String; let email: String }
+        let body = try JSONEncoder().encode(Body(household_id: householdId, email: email))
         let _: HouseholdResponse = try await request(path: "api/household", method: "POST", body: body, accessToken: accessToken)
     }
 
     func acceptInvite(membershipId: String, accessToken: String?) async throws {
-        let body = try JSONEncoder().encode(["action": "accept", "membership_id": membershipId])
+        struct Body: Encodable { let action = "accept"; let membership_id: String }
+        let body = try JSONEncoder().encode(Body(membership_id: membershipId))
         let _: HouseholdResponse = try await request(path: "api/household", method: "POST", body: body, accessToken: accessToken)
+    }
+
+    func getChatHistory(accessToken: String?) async throws -> [ChatMessage] {
+        struct Wrapper: Decodable { let messages: [ChatMessage]? }
+        let w: Wrapper = try await request(path: "api/chat", method: "GET", accessToken: accessToken)
+        return w.messages ?? []
     }
 
     func chat(question: String, accessToken: String?) async throws -> String {
         let body = try JSONEncoder().encode(ChatRequest(question: question))
-        let response: ChatResponse = try await request(path: "api/chat", method: "POST", body: body, accessToken: accessToken)
-        if let err = response.error { throw BackendError.server(err) }
-        return response.answer ?? ""
+        let response: ChatPostResponse = try await request(path: "api/chat", method: "POST", body: body, accessToken: accessToken)
+        return response.response?.explanation ?? ""
     }
 }
 

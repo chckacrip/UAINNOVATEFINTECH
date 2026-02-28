@@ -15,7 +15,7 @@ SwiftUI app that uses the same Supabase backend and **Next.js app as API** for u
 
 2. **Configure backend and Supabase**  
    Edit `UAInnovateFintech/Config.plist` and set:
-   - `BACKEND_BASE_URL`: your Next.js backend (e.g. `https://your-app.vercel.app` or `http://127.0.0.1:3000` for simulator).
+   - `BACKEND_BASE_URL`: your Next.js backend (e.g. `https://your-app.vercel.app` or `http://127.0.0.1:3000` for simulator). **On a real device**, use your computer’s LAN IP (e.g. `http://192.168.1.100:3000`) so Chat and Upload can reach the API.
    - `SUPABASE_URL`: same as in the Next.js `.env.local`.
    - `SUPABASE_ANON_KEY`: same as `NEXT_PUBLIC_SUPABASE_ANON_KEY` in Next.js.
 

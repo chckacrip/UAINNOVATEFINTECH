@@ -820,12 +820,13 @@ export default function OnboardingPage() {
                     await supabase.from("liabilities").insert(rows);
                   }
                   if (data.profile && typeof data.profile === "object") {
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- omit id when restoring profile
                     const { id, ...rest } = data.profile as Record<string, unknown>;
                     await supabase.from("profiles").update(rest).eq("id", user.id);
                   }
                   alert("Restore complete. Refresh the page.");
                   window.location.reload();
-                } catch (err) { alert("Invalid JSON or restore failed."); }
+                } catch { alert("Invalid JSON or restore failed."); }
                 e.target.value = "";
               }} />
             </label>

@@ -113,4 +113,61 @@ final class SupabaseService: ObservableObject {
             .value
         return response
     }
+
+    func deleteBillReminders(userId: String) async throws {
+        try await client.from("bill_reminders").delete().eq("user_id", value: userId).execute()
+    }
+
+    func insertBillReminder(_ reminder: some Encodable) async throws {
+        try await client.from("bill_reminders").insert(reminder).execute()
+    }
+
+    func fetchAssets(userId: String) async throws -> [Asset] {
+        let response: [Asset] = try await client
+            .from("assets")
+            .select()
+            .eq("user_id", value: userId)
+            .order("value", ascending: false)
+            .execute()
+            .value
+        return response
+    }
+
+    func fetchLiabilities(userId: String) async throws -> [Liability] {
+        let response: [Liability] = try await client
+            .from("liabilities")
+            .select()
+            .eq("user_id", value: userId)
+            .order("balance", ascending: false)
+            .execute()
+            .value
+        return response
+    }
+
+    func fetchNetWorthSnapshots(userId: String) async throws -> [NetWorthSnapshot] {
+        let response: [NetWorthSnapshot] = try await client
+            .from("net_worth_snapshots")
+            .select()
+            .eq("user_id", value: userId)
+            .order("snapshot_month", ascending: false)
+            .execute()
+            .value
+        return response
+    }
+
+    func insertAsset(_ asset: some Encodable) async throws {
+        try await client.from("assets").insert(asset).execute()
+    }
+
+    func insertLiability(_ liability: some Encodable) async throws {
+        try await client.from("liabilities").insert(liability).execute()
+    }
+
+    func deleteAsset(id: String) async throws {
+        try await client.from("assets").delete().eq("id", value: id).execute()
+    }
+
+    func deleteLiability(id: String) async throws {
+        try await client.from("liabilities").delete().eq("id", value: id).execute()
+    }
 }
