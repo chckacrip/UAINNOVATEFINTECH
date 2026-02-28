@@ -21,6 +21,7 @@ import { createClient } from "@/lib/supabase/client";
 import { usePlaidLink } from "react-plaid-link";
 
 type UploadMode = "csv" | "image";
+type ImageSubMode = "statement" | "receipt";
 interface Account { id: string; name: string; account_type: string; }
 
 const ACCOUNT_ICONS: Record<string, React.ReactNode> = {
@@ -32,6 +33,7 @@ const ACCOUNT_ICONS: Record<string, React.ReactNode> = {
 
 export default function UploadPage() {
   const [mode, setMode] = useState<UploadMode>("csv");
+  const [imageSubMode, setImageSubMode] = useState<ImageSubMode>("statement");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
@@ -116,6 +118,7 @@ export default function UploadPage() {
     const formData = new FormData();
     formData.append("file", file);
     if (selectedAccount) formData.append("account_id", selectedAccount);
+    if (file.type.startsWith("image/") && imageSubMode === "receipt") formData.append("receipt", "true");
 
     const endpoint = file.type.startsWith("image/") ? "/api/upload-image" : "/api/upload";
 
@@ -188,8 +191,8 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="mb-8">
+    <div className="w-full min-h-[calc(100vh-7rem)] flex flex-col space-y-6">
+      <div className="flex-shrink-0">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Upload Statements</h1>
         <p className="text-slate-600 dark:text-slate-400 mt-1">
           Import transactions from a CSV, screenshot, or connect your bank.
@@ -219,9 +222,26 @@ export default function UploadPage() {
             }`}
           >
             <Camera className="h-4 w-4" />
-            Screenshot
+            Screenshot / Receipt
           </button>
         </div>
+
+        {mode === "image" && (
+          <div className="flex rounded-lg border border-slate-200 dark:border-slate-700 p-1 gap-1 w-fit">
+            <button
+              onClick={() => setImageSubMode("statement")}
+              className={`rounded-md px-3 py-1.5 text-xs font-medium ${imageSubMode === "statement" ? "bg-slate-200 dark:bg-slate-600 text-slate-900 dark:text-white" : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"}`}
+            >
+              Statement
+            </button>
+            <button
+              onClick={() => setImageSubMode("receipt")}
+              className={`rounded-md px-3 py-1.5 text-xs font-medium ${imageSubMode === "receipt" ? "bg-slate-200 dark:bg-slate-600 text-slate-900 dark:text-white" : "text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"}`}
+            >
+              Receipt
+            </button>
+          </div>
+        )}
 
         {/* Account Selector */}
         <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">

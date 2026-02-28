@@ -18,6 +18,13 @@ export interface Goal {
   name: string;
   target_amount: number;
   target_date: string;
+  saved?: number; // manual "saved so far" amount
+}
+
+export interface RecurringIncomeItem {
+  name: string;
+  amount: number;
+  frequency: "weekly" | "biweekly" | "monthly";
 }
 
 export interface Profile {
@@ -34,6 +41,19 @@ export interface Profile {
   onboarded: boolean;
   created_at: string;
   updated_at: string;
+  custom_categories?: string[];
+  recurring_income?: RecurringIncomeItem[];
+  merchant_rules?: MerchantRule[];
+  budget_rollover?: Record<string, boolean>;
+  filter_presets?: FilterPreset[];
+  report_schedule?: ReportSchedule;
+  net_worth_target_amount?: number;
+  net_worth_target_date?: string;
+  transaction_templates?: TransactionTemplate[];
+  subscription_price_history?: Record<string, { date: string; amount: number }[]>;
+  category_emoji?: Record<string, string>;
+  dashboard_sections?: { order: string[]; collapsed: string[] };
+  transaction_rules?: TransactionRule[];
 }
 
 export const INDUSTRIES = [
@@ -77,6 +97,59 @@ export interface Transaction {
   merchant: string;
   source_file: string;
   created_at: string;
+  notes?: string;
+  tags?: string[];
+  splits?: { category: string; amount: number }[];
+  account_id?: string;
+  refund_of_id?: string;
+  is_refund?: boolean;
+  receipt_url?: string;
+}
+
+export interface TransactionTemplate {
+  id: string;
+  name: string;
+  amount: number;
+  merchant: string;
+  category: string;
+}
+
+export interface TransactionRule {
+  id: string;
+  condition: { amountMin?: number; amountMax?: number; category?: string; merchantPattern?: string };
+  action: { addTag?: string; setCategory?: string };
+}
+
+export interface BillReminder {
+  id: string;
+  user_id: string;
+  name: string;
+  due_day: number;
+  amount?: number;
+  currency?: string;
+  category?: string;
+  reminder_days_before: number;
+  created_at?: string;
+}
+
+export interface FilterPreset {
+  id: string;
+  name: string;
+  dateFrom?: string;
+  dateTo?: string;
+  category?: string;
+  tag?: string;
+  search?: string;
+}
+
+export interface ReportSchedule {
+  enabled: boolean;
+  frequency: "weekly" | "monthly";
+}
+
+export interface MerchantRule {
+  pattern: string;
+  category: string;
 }
 
 export interface ChatMessage {

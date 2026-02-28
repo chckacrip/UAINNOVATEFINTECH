@@ -118,6 +118,21 @@ Return a JSON array of category strings in the same order. Only return the JSON 
   }
 }
 
+export function applyUserMerchantRules(
+  rows: { description: string }[],
+  categories: string[],
+  rules: { pattern: string; category: string }[]
+): string[] {
+  if (!rules?.length) return categories;
+  return rows.map((row, i) => {
+    const lower = row.description.toLowerCase();
+    for (const rule of rules) {
+      if (lower.includes(rule.pattern.toLowerCase())) return rule.category;
+    }
+    return categories[i] ?? "Other";
+  });
+}
+
 export async function categorizeTransactions(
   rows: { description: string; amount: number }[]
 ): Promise<{ merchant: string; category: Category }[]> {

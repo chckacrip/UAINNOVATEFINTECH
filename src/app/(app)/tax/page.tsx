@@ -6,22 +6,35 @@ import { estimateTax, FilingStatus } from "@/lib/tax";
 import { US_STATES } from "@/lib/hcol";
 import { Calculator, DollarSign, Percent, Calendar } from "lucide-react";
 
+const TAX_TAG = "tax-deductible";
+const currentYear = new Date().getFullYear();
+
 export default function TaxPage() {
   const [annualIncome, setAnnualIncome] = useState(0);
   const [filingStatus, setFilingStatus] = useState<FilingStatus>("single");
   const [stateCode, setStateCode] = useState("");
   const [deductions, setDeductions] = useState(0);
+  const [ytdTaxDeductible, setYtdTaxDeductible] = useState(0);
 
   useEffect(() => {
     const load = async () => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const { data } = await supabase.from("profiles").select("monthly_income, state").eq("id", user.id).single();
+      const [profileRes, txRes] = await Promise.all([
+        supabase.from("profiles").select("monthly_income, state").eq("id", user.id).single(),
+        supabase.from("transactions").select("amount, tags").eq("user_id", user.id).gte("posted_at", `${currentYear}-01-01`).lte("posted_at", `${currentYear}-12-31`),
+      ]);
+      const data = profileRes.data;
       if (data) {
         setAnnualIncome((data.monthly_income || 0) * 12);
         setStateCode(data.state || "");
       }
+      const txns = (txRes.data ?? []) as { amount: number; tags?: string[] }[];
+      const sum = txns
+        .filter((t) => Array.isArray(t.tags) && (t.tags.includes(TAX_TAG) || t.tags.some((tag) => tag.toLowerCase().includes("tax"))))
+        .reduce((s, t) => s + Math.abs(t.amount), 0);
+      setYtdTaxDeductible(sum);
     };
     load();
   }, []);
@@ -32,11 +45,20 @@ export default function TaxPage() {
   );
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      <div>
+    <div className="w-full min-h-[calc(100vh-7rem)] flex flex-col space-y-6">
+      <div className="flex-shrink-0">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Tax Estimator</h1>
         <p className="text-slate-600 dark:text-slate-400 text-sm">Estimate your 2026 federal and state tax liability.</p>
       </div>
+
+      {/* YTD tax-deductible */}
+      {ytdTaxDeductible > 0 && (
+        <div className="rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 p-4">
+          <h3 className="text-sm font-semibold text-emerald-800 dark:text-emerald-300 mb-1">YTD tax-deductible (tagged)</h3>
+          <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">${ytdTaxDeductible.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+          <p className="text-xs text-emerald-700 dark:text-emerald-300 mt-1">Sum of transactions tagged &quot;tax-deductible&quot; or containing &quot;tax&quot; in {currentYear}.</p>
+        </div>
+      )}
 
       {/* Inputs */}
       <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6">

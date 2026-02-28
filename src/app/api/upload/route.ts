@@ -39,6 +39,14 @@ export async function POST(request: NextRequest) {
   const categorized = await categorizeTransactions(
     normalized.map((r) => ({ description: r.description, amount: r.amount }))
   );
+  const { data: profile } = await supabase.from("profiles").select("merchant_rules").eq("id", user.id).single();
+  const rules = (profile?.merchant_rules as { pattern: string; category: string }[]) ?? [];
+  const { applyUserMerchantRules } = await import("@/lib/categorize");
+  const overriddenCategories = applyUserMerchantRules(
+    normalized.map((r) => ({ description: r.description })),
+    categorized.map((c) => c.category),
+    rules
+  );
 
   // Why: deterministic IDs from hash of user+date+amount+description.
   // ON CONFLICT DO NOTHING ensures retried uploads are idempotent.
@@ -49,7 +57,7 @@ export async function POST(request: NextRequest) {
     description: row.description,
     amount: row.amount,
     currency: "USD",
-    category: categorized[i].category,
+    category: overriddenCategories[i] ?? categorized[i].category,
     merchant: categorized[i].merchant,
     source_file: file.name,
     ...(accountId ? { account_id: accountId } : {}),

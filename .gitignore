@@ -34,3 +34,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# iOS app secrets (optional: duplicate Config.plist and add real keys here to keep them local)
+# /mobile/UAInnovateFintech/Config.plist

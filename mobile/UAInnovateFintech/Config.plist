@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>BACKEND_BASE_URL</key>
+	<string>https://your-next-app.vercel.app</string>
+	<key>SUPABASE_URL</key>
+	<string>https://cupyyaefoqxmbskbegka.supabase.co</string>
+	<key>SUPABASE_ANON_KEY</key>
+	<string>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN1cHl5YWVmb3F4bWJza2JlZ2thIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyOTg0NDUsImV4cCI6MjA4Nzg3NDQ0NX0.stuNPdOv5dzI0_bMTL7kp5NN5FE433K7ggbfJi_4c1k</string>
+</dict>
+</plist>

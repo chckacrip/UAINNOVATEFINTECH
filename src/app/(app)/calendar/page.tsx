@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Transaction } from "@/lib/types";
 import { detectRecurring } from "@/lib/summary";
+import Link from "next/link";
 import { Loader2, ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 
 export default function CalendarPage() {
@@ -35,6 +36,7 @@ export default function CalendarPage() {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const today = useMemo(() => new Date(), []);
 
+  const hasRecurring = recurring.length > 0;
   const billsByDay = useMemo(() => {
     const map: Record<number, { merchant: string; amount: number; category: string }[]> = {};
     for (const r of recurring) {
@@ -88,6 +90,23 @@ export default function CalendarPage() {
 
   if (loading) {
     return <div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-blue-600" /></div>;
+  }
+
+  if (transactions.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Bill Calendar</h1>
+          <p className="text-slate-600 dark:text-slate-400 text-sm">Track recurring bills and upcoming payments.</p>
+        </div>
+        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 text-center">
+          <CalendarDays className="h-12 w-12 text-slate-400 mx-auto mb-3" />
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">No transactions yet</h2>
+          <p className="text-slate-600 dark:text-slate-400 mb-4">Upload statements so we can detect recurring bills and show them on the calendar.</p>
+          <Link href="/upload" className="inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">Upload CSV</Link>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -15,13 +15,20 @@ export function computeMonthlySummary(
   let totalExpenses = 0;
 
   for (const t of filtered) {
-    if (t.amount > 0) {
+    if (t.is_refund) {
+      totalIncome += Math.abs(t.amount);
+      const cat = t.category || "Other";
+      byCategory[cat] = (byCategory[cat] || 0) - Math.abs(t.amount);
+      if (byCategory[cat] < 0) byCategory[cat] = 0;
+    } else if (t.amount > 0) {
       totalIncome += t.amount;
+      const cat = t.category || "Other";
+      byCategory[cat] = (byCategory[cat] || 0) + t.amount;
     } else {
       totalExpenses += Math.abs(t.amount);
+      const cat = t.category || "Other";
+      byCategory[cat] = (byCategory[cat] || 0) + Math.abs(t.amount);
     }
-    const cat = t.category || "Other";
-    byCategory[cat] = (byCategory[cat] || 0) + Math.abs(t.amount);
   }
 
   return {

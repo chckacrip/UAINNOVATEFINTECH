@@ -23,6 +23,18 @@ Rules:
 
 Return ONLY the JSON array, nothing else.`;
 
+const RECEIPT_PROMPT = `You are a receipt OCR tool. This image is a single receipt (photo or scan).
+
+Extract exactly ONE transaction. Return ONLY a valid JSON object (not an array) with:
+- "date": string in YYYY-MM-DD (use today if not on receipt)
+- "description": short description of what was bought
+- "amount": number — negative for the total paid (e.g. -42.50)
+- "merchant": business/store name from the receipt
+
+If the image is not a receipt or you cannot read it, return {"error": "not a receipt"}.
+
+Return ONLY the JSON object, nothing else.`;
+
 export async function POST(request: NextRequest) {
   const auth = await authenticateRequest(request);
   if (isAuthError(auth)) return auth;
@@ -30,6 +42,7 @@ export async function POST(request: NextRequest) {
 
   const formData = await request.formData();
   const file = formData.get("file") as File;
+  const isReceipt = formData.get("receipt") === "true";
   if (!file) {
     return NextResponse.json(
       { success: false, inserted: 0, errors: ["No file provided"] },
@@ -54,64 +67,88 @@ export async function POST(request: NextRequest) {
   // Why: client created per-request from env var, not cached at module level.
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-  let extracted: { date: string; description: string; amount: number }[];
+  let extracted: { date: string; description: string; amount: number; merchant?: string }[];
   try {
+    const prompt = isReceipt ? RECEIPT_PROMPT : EXTRACTION_PROMPT;
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
-      max_tokens: 4096,
+      max_tokens: isReceipt ? 512 : 4096,
       messages: [
         {
           role: "user",
           content: [
-            { type: "text", text: EXTRACTION_PROMPT },
+            { type: "text", text: prompt },
             { type: "image_url", image_url: { url: dataUri, detail: "high" } },
           ],
         },
       ],
     });
 
-    const text = response.choices[0]?.message?.content?.trim() ?? "[]";
+    const text = response.choices[0]?.message?.content?.trim() ?? (isReceipt ? "{}" : "[]");
     const cleaned = text.replace(/```json\n?/g, "").replace(/```/g, "").trim();
-    extracted = JSON.parse(cleaned);
 
-    if (!Array.isArray(extracted)) {
-      return NextResponse.json({
-        success: false,
-        inserted: 0,
-        errors: ["Could not extract transactions from this image. Try a clearer screenshot."],
-      });
+    if (isReceipt) {
+      const obj = JSON.parse(cleaned);
+      if (obj.error) {
+        return NextResponse.json({
+          success: false,
+          inserted: 0,
+          errors: [obj.error === "not a receipt" ? "Could not read receipt. Try a clearer photo." : "Could not extract receipt."],
+        });
+      }
+      extracted = [{
+        date: obj.date || new Date().toISOString().slice(0, 10),
+        description: obj.description || obj.merchant || "Receipt",
+        amount: typeof obj.amount === "number" ? obj.amount : -Math.abs(parseFloat(obj.amount) || 0),
+        merchant: obj.merchant,
+      }];
+    } else {
+      extracted = JSON.parse(cleaned);
+      if (!Array.isArray(extracted)) {
+        return NextResponse.json({
+          success: false,
+          inserted: 0,
+          errors: ["Could not extract transactions from this image. Try a clearer screenshot."],
+        });
+      }
+      if (extracted.length === 0) {
+        return NextResponse.json({
+          success: false,
+          inserted: 0,
+          errors: ["No transactions found in this image. Try a clearer screenshot."],
+        });
+      }
     }
   } catch {
     return NextResponse.json({
       success: false,
       inserted: 0,
-      errors: ["Failed to process image. Make sure it's a clear screenshot of a bank statement."],
-    });
-  }
-
-  if (extracted.length === 0) {
-    return NextResponse.json({
-      success: false,
-      inserted: 0,
-      errors: ["No transactions found in this image. Try a clearer screenshot."],
+      errors: [isReceipt ? "Failed to process receipt image." : "Failed to process image. Make sure it's a clear screenshot of a bank statement."],
     });
   }
 
   const categorized = await categorizeTransactions(
-    extracted.map((r) => ({ description: r.description, amount: r.amount }))
+    extracted.map((r) => ({ description: r.description || r.merchant || "", amount: r.amount }))
+  );
+  const { data: profile } = await supabase.from("profiles").select("merchant_rules").eq("id", user.id).single();
+  const rules = (profile?.merchant_rules as { pattern: string; category: string }[]) ?? [];
+  const { applyUserMerchantRules } = await import("@/lib/categorize");
+  const overriddenCategories = applyUserMerchantRules(
+    extracted.map((r) => ({ description: r.description || r.merchant || "" })),
+    categorized.map((c) => c.category),
+    rules
   );
 
-  // Why: deterministic IDs prevent duplicates on retry.
   const transactions = extracted.map((row, i) => ({
-    id: transactionHash(user.id, row.date, row.amount, row.description),
+    id: transactionHash(user.id, row.date, row.amount, row.description || row.merchant || String(i)),
     user_id: user.id,
     posted_at: row.date,
-    description: row.description,
+    description: row.description || row.merchant || "Receipt",
     amount: row.amount,
     currency: "USD",
-    category: categorized[i].category,
-    merchant: categorized[i].merchant,
-    source_file: `screenshot:${file.name}`,
+    category: overriddenCategories[i] ?? categorized[i].category,
+    merchant: (row.merchant || categorized[i].merchant) ?? "",
+    source_file: isReceipt ? `receipt:${file.name}` : `screenshot:${file.name}`,
   }));
 
   const { error, data } = await supabase

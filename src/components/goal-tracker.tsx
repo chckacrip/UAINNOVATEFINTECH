@@ -20,9 +20,10 @@ export function GoalTracker({ goals, monthlySavings }: GoalTrackerProps) {
           ? Math.max(1, (targetDate.getFullYear() - now.getFullYear()) * 12 + targetDate.getMonth() - now.getMonth())
           : 12;
 
-        const neededPerMonth = goal.target_amount / monthsLeft;
-        const projectedSaved = monthlySavings > 0 ? monthlySavings * monthsLeft : 0;
-        const progress = Math.min(100, Math.max(0, (projectedSaved / goal.target_amount) * 100));
+        const savedSoFar = goal.saved ?? 0;
+        const neededPerMonth = Math.max(1, (goal.target_amount - savedSoFar) / monthsLeft);
+        const projectedTotal = savedSoFar + (monthlySavings > 0 ? monthlySavings * monthsLeft : 0);
+        const progress = Math.min(100, Math.max(0, (projectedTotal / goal.target_amount) * 100));
         const onTrack = monthlySavings >= neededPerMonth;
 
         return (
@@ -48,8 +49,8 @@ export function GoalTracker({ goals, monthlySavings }: GoalTrackerProps) {
             </div>
             <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
               <span>Need ${neededPerMonth.toFixed(0)}/mo</span>
-              <span>${goal.target_amount.toLocaleString()} goal</span>
-              {targetDate && <span>{monthsLeft} months left</span>}
+              <span>${(savedSoFar).toLocaleString()} saved → ${goal.target_amount.toLocaleString()}</span>
+              {targetDate && <span>{monthsLeft} mo left</span>}
             </div>
           </div>
         );
