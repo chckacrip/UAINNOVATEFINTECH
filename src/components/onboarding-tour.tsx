@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { X, ArrowRight, LayoutDashboard, Upload, Settings } from "lucide-react";
 
-const TOUR_STORAGE_KEY = "financecopilot_tour_done";
+const TOUR_STORAGE_KEY = "motionfi_tour_done";
 
 export function OnboardingTour() {
   const [open, setOpen] = useState(false);
@@ -34,7 +34,7 @@ export function OnboardingTour() {
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true">
       <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 w-full max-w-md shadow-xl">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Welcome to FinanceCopilot</h3>
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Welcome to MotionFi</h3>
           <button type="button" onClick={finish} className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
             <X className="h-4 w-4" />
           </button>

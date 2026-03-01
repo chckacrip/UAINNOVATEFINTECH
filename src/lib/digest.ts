@@ -100,7 +100,7 @@ export async function generateDigestEmail(data: DigestData): Promise<{ subject: 
   let parsed: { subject?: string; bullets?: string[] } = {};
   try { parsed = JSON.parse(text); } catch { /* fallback below */ }
 
-  const subject = parsed.subject || `FinanceCopilot Weekly: ${data.summary.month}`;
+  const subject = parsed.subject || `MotionFi Weekly: ${data.summary.month}`;
   const bullets = parsed.bullets || [
     `You spent $${data.summary.total_expenses.toFixed(0)} this month.`,
     `Your Financial Score is ${data.score}/100.`,
@@ -133,7 +133,7 @@ export async function generateDigestEmail(data: DigestData): Promise<{ subject: 
         </ul>
         
         <p style="margin-top:20px;font-size:13px;color:#94a3b8;">
-          — FinanceCopilot | <a href="#" style="color:#3b82f6;">Open Dashboard</a>
+          — MotionFi | <a href="#" style="color:#3b82f6;">Open Dashboard</a>
         </p>
       </div>
     </div>

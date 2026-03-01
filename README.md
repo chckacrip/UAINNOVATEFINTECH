@@ -1,4 +1,4 @@
-# FinanceCopilot
+# MotionFi
 
 AI-powered personal accountant and financial analyst. Upload bank statements, get spending analysis, detect subscriptions, and chat with an AI that knows your finances.
 

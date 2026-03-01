@@ -1,4 +1,4 @@
-# UA Innovate Fintech – iOS App
+# MotionFi – iOS App
 
 SwiftUI app that uses the same Supabase backend and **Next.js app as API** for uploads, household, chat, and Plaid.
 

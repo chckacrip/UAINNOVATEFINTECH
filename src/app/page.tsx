@@ -1,10 +1,10 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   BarChart3,
   Upload,
   MessageSquare,
   Shield,
-  TrendingUp,
   Sparkles,
 } from "lucide-react";
 
@@ -14,8 +14,8 @@ export default function HomePage() {
       <nav className="border-b border-slate-200 bg-white/80 backdrop-blur-sm">
         <div className="mx-auto max-w-6xl flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2">
-            <TrendingUp className="h-6 w-6 text-blue-600" />
-            <span className="text-xl font-bold text-slate-900">FinanceCopilot</span>
+            <Image src="/motionfi.png" alt="MotionFi" width={28} height={28} className="h-7 w-7 object-contain" />
+            <span className="text-xl font-bold text-slate-900">MotionFi</span>
           </div>
           <Link
             href="/login"

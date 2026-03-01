@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       client_id: PLAID_CLIENT_ID,
       secret: PLAID_SECRET,
       user: { client_user_id: user.id },
-      client_name: "FinanceCopilot",
+      client_name: "MotionFi",
       products: ["transactions"],
       country_codes: ["US"],
       language: "en",

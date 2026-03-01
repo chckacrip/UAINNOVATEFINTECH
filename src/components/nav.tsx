@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "./theme-toggle";
 import {
-  TrendingUp,
   LayoutDashboard,
   Upload,
   MessageSquare,
@@ -88,8 +88,8 @@ export function AppNav() {
       <div className="w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3">
         <div className="flex items-center gap-4 md:gap-6">
           <Link href="/dashboard" className="flex items-center gap-2 shrink-0">
-            <TrendingUp className="h-5 w-5 text-blue-600" />
-            <span className="font-bold text-slate-900 dark:text-white hidden sm:inline">FinanceCopilot</span>
+            <Image src="/motionfi.png" alt="MotionFi" width={28} height={28} className="h-7 w-7 object-contain" />
+            <span className="font-bold text-slate-900 dark:text-white hidden sm:inline">MotionFi</span>
           </Link>
           <div className="hidden lg:flex items-center gap-0.5 overflow-x-auto">
             {MAIN_NAV.map((item) => {

@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { TrendingUp, Mail, Lock, Loader2 } from "lucide-react";
+import Image from "next/image";
+import { Mail, Lock, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -51,8 +52,8 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-4">
-            <TrendingUp className="h-8 w-8 text-blue-600" />
-            <span className="text-2xl font-bold text-slate-900">FinanceCopilot</span>
+            <Image src="/motionfi.png" alt="MotionFi" width={36} height={36} className="h-9 w-9 object-contain" />
+            <span className="text-2xl font-bold text-slate-900">MotionFi</span>
           </Link>
           <p className="text-slate-600">
             {isSignUp ? "Create your account" : "Welcome back"}

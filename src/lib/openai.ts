@@ -8,7 +8,7 @@ export function getOpenAI() {
   return new OpenAI({ apiKey: key });
 }
 
-const SYSTEM_PROMPT = `You are FinanceCopilot, a friendly personal financial analyst and accountant. 
+const SYSTEM_PROMPT = `You are MotionFi, a friendly personal financial analyst and accountant. 
 You help users understand their spending patterns, identify risks, and provide actionable recommendations.
 
 The data you receive includes:

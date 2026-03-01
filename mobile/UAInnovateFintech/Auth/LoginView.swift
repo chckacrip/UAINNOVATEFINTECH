@@ -12,10 +12,11 @@ struct LoginView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
-                    Image(systemName: "chart.line.uptrend.xyaxis")
-                        .font(.system(size: 48))
-                        .foregroundStyle(.blue)
-                    Text("UA Innovate Fintech")
+                    Image("motionfi")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 72, height: 72)
+                    Text("MotionFi")
                         .font(.title2.bold())
                     Text(isSignUp ? "Create your account" : "Welcome back")
                         .font(.subheadline)

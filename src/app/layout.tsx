@@ -14,7 +14,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "FinanceCopilot — Your AI Financial Analyst",
+  title: "MotionFi — Your AI Financial Analyst",
   description: "Upload bank statements, get AI-powered financial insights and recommendations.",
 };
 

@@ -20,6 +20,7 @@
 		B1000000000000000000000B /* UploadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000B /* UploadView.swift */; };
 		B1000000000000000000000C /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000C /* ProfileView.swift */; };
 		B1000000000000000000000D /* Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000D /* Config.plist */; };
+		B10000000000000000000021 /* motionfi.png in Resources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000021 /* motionfi.png */; };
 		B1000000000000000000000F /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = P10000000000000000000001 /* Supabase */; };
 		B10000000000000000000010 /* RecurringHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000011 /* RecurringHelper.swift */; };
 		B10000000000000000000011 /* TaxEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000012 /* TaxEstimator.swift */; };
@@ -69,6 +70,7 @@
 		F1000000000000000000001D /* MoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreView.swift; sourceTree = "<group>"; };
 		F1000000000000000000001E /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		F10000000000000000000020 /* DashboardHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardHelper.swift; sourceTree = "<group>"; };
+		F10000000000000000000021 /* motionfi.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = motionfi.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +106,7 @@
 				G10000000000000000000008 /* Views */,
 				F1000000000000000000000D /* Config.plist */,
 				F1000000000000000000000E /* Info.plist */,
+				F10000000000000000000021 /* motionfi.png */,
 			);
 			path = UAInnovateFintech;
 			sourceTree = "<group>";
@@ -243,6 +246,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B1000000000000000000000D /* Config.plist in Resources */,
+				B10000000000000000000021 /* motionfi.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
