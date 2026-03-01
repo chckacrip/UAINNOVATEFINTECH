@@ -22,7 +22,6 @@
 		B1000000000000000000000D /* Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000000D /* Config.plist */; };
 		B1000000000000000000000F /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = P10000000000000000000001 /* Supabase */; };
 		B10000000000000000000010 /* RecurringHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000011 /* RecurringHelper.swift */; };
-		B1000000000000000000001D /* DashboardHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000020 /* DashboardHelper.swift */; };
 		B10000000000000000000011 /* TaxEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000012 /* TaxEstimator.swift */; };
 		B10000000000000000000012 /* TagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000013 /* TagsView.swift */; };
 		B10000000000000000000013 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000014 /* SearchView.swift */; };
@@ -35,6 +34,7 @@
 		B1000000000000000000001A /* HouseholdView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000001B /* HouseholdView.swift */; };
 		B1000000000000000000001B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000001C /* SettingsView.swift */; };
 		B1000000000000000000001C /* MoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000001D /* MoreView.swift */; };
+		B1000000000000000000001D /* DashboardHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000020 /* DashboardHelper.swift */; };
 		B1000000000000000000001E /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000001E /* AppTheme.swift */; };
 /* End PBXBuildFile section */
 
@@ -52,8 +52,9 @@
 		F1000000000000000000000B /* UploadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadView.swift; sourceTree = "<group>"; };
 		F1000000000000000000000C /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		F1000000000000000000000D /* Config.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Config.plist; sourceTree = "<group>"; };
+		F1000000000000000000000E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F10000000000000000000010 /* UAInnovateFintech.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UAInnovateFintech.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F10000000000000000000011 /* RecurringHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecurringHelper.swift; sourceTree = "<group>"; };
-		F10000000000000000000020 /* DashboardHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardHelper.swift; sourceTree = "<group>"; };
 		F10000000000000000000012 /* TaxEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaxEstimator.swift; sourceTree = "<group>"; };
 		F10000000000000000000013 /* TagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagsView.swift; sourceTree = "<group>"; };
 		F10000000000000000000014 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
@@ -67,8 +68,7 @@
 		F1000000000000000000001C /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		F1000000000000000000001D /* MoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreView.swift; sourceTree = "<group>"; };
 		F1000000000000000000001E /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
-		F1000000000000000000000E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		F10000000000000000000010 /* UAInnovateFintech.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UAInnovateFintech.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F10000000000000000000020 /* DashboardHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardHelper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,14 +106,6 @@
 				F1000000000000000000000E /* Info.plist */,
 			);
 			path = UAInnovateFintech;
-			sourceTree = "<group>";
-		};
-		G10000000000000000000009 /* Theme */ = {
-			isa = PBXGroup;
-			children = (
-				F1000000000000000000001E /* AppTheme.swift */,
-			);
-			path = Theme;
 			sourceTree = "<group>";
 		};
 		G10000000000000000000003 /* Products */ = {
@@ -181,6 +173,14 @@
 				F1000000000000000000001C /* SettingsView.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		G10000000000000000000009 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				F1000000000000000000001E /* AppTheme.swift */,
+			);
+			path = Theme;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -348,7 +348,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 2JX7H4GLZG;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = UAInnovateFintech/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -372,7 +372,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 2JX7H4GLZG;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = UAInnovateFintech/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

@@ -566,6 +566,35 @@ struct ProfileView: View {
         }
     }
 
+    private var clearTransactionsButton: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Button {
+                showClearTransactionsConfirm = true
+            } label: {
+                HStack {
+                    if clearingTransactions {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                    } else {
+                        Image(systemName: "trash")
+                            .font(.system(size: 14))
+                    }
+                    Text("Clear all transactions")
+                        .font(.system(size: 14, weight: .medium))
+                }
+                .foregroundColor(AppTheme.danger)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(AppTheme.danger.opacity(0.08))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+            .disabled(clearingTransactions)
+            Text("Permanently delete every transaction. This cannot be undone.")
+                .font(.system(size: 12))
+                .foregroundColor(AppTheme.muted)
+        }
+    }
+
     private var signOutButton: some View {
         Button {
             Task { try? await supabase.signOut() }
@@ -576,6 +605,19 @@ struct ProfileView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
         }
+    }
+
+    private func clearAllTransactions() async {
+        guard let userId = supabase.session?.user.id.uuidString else { return }
+        await MainActor.run { clearingTransactions = true }
+        do {
+            try await supabase.deleteAllTransactions(userId: userId)
+        } catch {
+            await MainActor.run {
+                // Could show an alert; for now just clear the flag
+            }
+        }
+        await MainActor.run { clearingTransactions = false }
     }
 
     private func load() async {

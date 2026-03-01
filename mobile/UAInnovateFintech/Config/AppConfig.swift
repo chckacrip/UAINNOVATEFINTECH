@@ -10,8 +10,8 @@ enum AppConfig {
     }()
 
     static var backendBaseURL: URL {
-        guard let raw = plist["BACKEND_BASE_URL"] as? String, let url = URL(string: raw) else {
-            return URL(string: "http://127.0.0.1:3000")!
+        guard let raw = plist["BACKEND_BASE_URL"] as? String, !raw.isEmpty, let url = URL(string: raw) else {
+            return URL(string: "https://main.d19vivzlve7dd.amplifyapp.com")!
         }
         return url
     }

@@ -131,7 +131,7 @@ struct ChatView: View {
             }
         } catch {
             await MainActor.run {
-                messages.append(ChatMessage(id: UUID().uuidString, user_id: nil, role: "assistant", content: "Sorry, I couldn’t reach the server. Check your connection and that the app backend is running.", created_at: nil))
+                messages.append(ChatMessage(id: UUID().uuidString, user_id: nil, role: "assistant", content: "Sorry, I couldn’t reach the server. Check your connection and try again.", created_at: nil))
                 loading = false
                 errorMessage = connectionHint(for: error)
             }
@@ -139,13 +139,19 @@ struct ChatView: View {
     }
 
     private func connectionHint(for error: Error) -> String {
-        if (error as NSError).domain == NSURLErrorDomain {
-            switch (error as NSError).code {
+        let ns = error as NSError
+        if ns.domain == NSURLErrorDomain {
+            switch ns.code {
             case NSURLErrorCannotConnectToHost, NSURLErrorNetworkConnectionLost, NSURLErrorNotConnectedToInternet:
-                return "Can’t reach the server. Set BACKEND_BASE_URL in Config.plist to your computer’s IP (e.g. http://192.168.1.x:3000) when testing on a device."
+                return "Check your internet connection. If using a cloud backend, ensure BACKEND_BASE_URL in Config.plist is correct (e.g. your Amplify URL)."
+            case NSURLErrorTimedOut:
+                return "Request timed out. Check your connection and that the backend is reachable."
             default:
                 break
             }
+        }
+        if (error as? BackendError) != nil {
+            return "Server returned an error. Check that the backend is deployed and that BACKEND_BASE_URL in Config.plist points to it."
         }
         return ""
     }

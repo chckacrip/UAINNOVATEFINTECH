@@ -5,6 +5,8 @@ struct MainTabView: View {
         TabView {
             DashboardView()
                 .tabItem { Label("Dashboard", systemImage: "chart.pie") }
+            ChatView()
+                .tabItem { Label("Chat", systemImage: "bubble.left.and.bubble.right") }
             TransactionsView()
                 .tabItem { Label("Transactions", systemImage: "list.bullet") }
             UploadView()
