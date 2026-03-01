@@ -80,7 +80,27 @@ export default function ChatPage() {
         body: JSON.stringify({ question: question.trim() }),
       });
       const data = await res.json();
+
+      if (!res.ok) {
+        const serverError = typeof data?.error === "string" ? data.error : data?.message ?? `HTTP ${res.status}`;
+        console.error("[Chat] API error:", res.status, data);
+        const errorMsg: ChatMessage = {
+          id: crypto.randomUUID(),
+          user_id: "",
+          role: "assistant",
+          content: `Sorry, something went wrong (${res.status}). ${serverError}. Check the browser console (F12) for details.`,
+          created_at: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, errorMsg]);
+        setLoading(false);
+        return;
+      }
+
       const response: AnalystResponse = data.response;
+      if (!response?.explanation) {
+        console.error("[Chat] Unexpected response shape:", data);
+        throw new Error("Invalid response from server");
+      }
 
       const assistantMsg: ChatMessage = {
         id: crypto.randomUUID(),
@@ -91,12 +111,13 @@ export default function ChatPage() {
         created_at: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, assistantMsg]);
-    } catch {
+    } catch (e) {
+      console.error("[Chat] Request failed:", e);
       const errorMsg: ChatMessage = {
         id: crypto.randomUUID(),
         user_id: "",
         role: "assistant",
-        content: "Sorry, something went wrong. Please try again.",
+        content: "Sorry, something went wrong. Please try again. Check the browser console (F12) for details.",
         created_at: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, errorMsg]);

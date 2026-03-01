@@ -103,7 +103,18 @@ export async function POST(request: NextRequest) {
   };
 
   const contextJson = JSON.stringify(fullContext, null, 2);
-  const response = await analyzeFinances(contextJson, question);
+
+  let response;
+  try {
+    response = await analyzeFinances(contextJson, question);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[api/chat] analyzeFinances failed:", err);
+    return NextResponse.json(
+      { error: message || "Analysis failed. Check server logs and OPENAI_API_KEY." },
+      { status: 500 }
+    );
+  }
 
   // Fire-and-forget: store chat history (non-critical, don't block response)
   supabase.from("chat_messages").insert([
