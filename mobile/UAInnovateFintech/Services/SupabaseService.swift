@@ -104,6 +104,10 @@ final class SupabaseService: ObservableObject {
         try await client.from("transactions").delete().eq("id", value: id).execute()
     }
 
+    func deleteAllTransactions(userId: String) async throws {
+        try await client.from("transactions").delete().eq("user_id", value: userId).execute()
+    }
+
     func fetchBillReminders(userId: String) async throws -> [BillReminder] {
         let response: [BillReminder] = try await client
             .from("bill_reminders")

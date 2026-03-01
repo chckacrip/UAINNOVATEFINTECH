@@ -44,6 +44,8 @@ struct ProfileView: View {
     @State private var newBillName = ""
     @State private var newBillDay = ""
     @State private var newBillAmount = ""
+    @State private var showClearTransactionsConfirm = false
+    @State private var clearingTransactions = false
 
     var body: some View {
         NavigationStack {
@@ -68,6 +70,7 @@ struct ProfileView: View {
                             billRemindersCard
                             digestCard
                             saveButton
+                            clearTransactionsButton
                             signOutButton
                         }
                         .padding(.horizontal, 20)
@@ -75,6 +78,14 @@ struct ProfileView: View {
                         .padding(.bottom, 40)
                     }
                 }
+            }
+            .confirmationDialog("Clear all transactions?", isPresented: $showClearTransactionsConfirm, titleVisibility: .visible) {
+                Button("Clear all", role: .destructive) {
+                    Task { await clearAllTransactions() }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This will permanently delete every transaction in your account. This cannot be undone.")
             }
             .navigationTitle("Financial Profile")
             .navigationBarTitleDisplayMode(.large)

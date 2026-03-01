@@ -20,6 +20,7 @@ import {
   Mail,
   Link2,
 } from "lucide-react";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 export default function OnboardingPage() {
   const [monthlyIncome, setMonthlyIncome] = useState<number>(0);
@@ -52,6 +53,8 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [showClearTransactionsConfirm, setShowClearTransactionsConfirm] = useState(false);
+  const [clearingTransactions, setClearingTransactions] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -847,7 +850,45 @@ export default function OnboardingPage() {
             {saved ? "Saved! Redirecting..." : "Save & Continue"}
           </button>
         </div>
+
+        <div className="md:col-span-2 lg:col-span-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+          <button
+            type="button"
+            onClick={() => setShowClearTransactionsConfirm(true)}
+            disabled={clearingTransactions}
+            className="w-full rounded-lg border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+          >
+            {clearingTransactions ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+            Clear all transactions
+          </button>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 text-center">
+            Permanently delete every transaction in your account. This cannot be undone.
+          </p>
+        </div>
       </div>
+
+      <ConfirmDialog
+        open={showClearTransactionsConfirm}
+        title="Clear all transactions?"
+        message="This will permanently delete every transaction in your account. This cannot be undone."
+        confirmLabel="Clear all"
+        onConfirm={async () => {
+          setShowClearTransactionsConfirm(false);
+          setClearingTransactions(true);
+          try {
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+              const { error } = await supabase.from("transactions").delete().eq("user_id", user.id);
+              if (error) throw error;
+            }
+          } catch (e) {
+            alert("Failed to clear transactions: " + (e instanceof Error ? e.message : String(e)));
+          }
+          setClearingTransactions(false);
+        }}
+        onCancel={() => setShowClearTransactionsConfirm(false)}
+      />
     </div>
   );
 }
