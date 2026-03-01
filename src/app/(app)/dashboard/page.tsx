@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Transaction, MonthlySummary, Goal, BillReminder } from "@/lib/types";
 import { computeMonthlySummary, detectRecurring, computeFinancialScore } from "@/lib/summary";
@@ -32,6 +33,7 @@ import { OnboardingTour } from "@/components/onboarding-tour";
 import { DashboardSkeleton } from "@/components/skeleton";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [monthlyIncome, setMonthlyIncome] = useState(0);
@@ -50,7 +52,11 @@ export default function DashboardPage() {
     const load = async () => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        router.replace("/login");
+        return;
+      }
 
       const [txRes, profileRes, remindersRes] = await Promise.all([
         supabase
@@ -84,7 +90,7 @@ export default function DashboardPage() {
       setLoading(false);
     };
     load();
-  }, []);
+  }, [router]);
 
   if (loading) return <DashboardSkeleton />;
 

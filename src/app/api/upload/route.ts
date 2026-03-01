@@ -4,12 +4,13 @@ import { parseCSV, parseCSVWithMapping, normalizeRows, COULD_NOT_IDENTIFY_COLUMN
 import { inferCSVMapping } from "@/lib/csv-infer";
 import { categorizeTransactions } from "@/lib/categorize";
 import { transactionHash } from "@/lib/tx-hash";
-
-// Why: removed cookie-based getSupabase(). API routes now use JWT auth
-// via authenticateRequest(), making each invocation fully stateless
-// and Lambda cold-start safe.
+import { rateLimit } from "@/lib/rate-limit";
+import { logApiError } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
+  const rateLimitRes = await rateLimit(request, "upload", { max: 20 });
+  if (rateLimitRes) return rateLimitRes;
+
   const auth = await authenticateRequest(request);
   if (isAuthError(auth)) return auth;
   const { supabase, user } = auth;
@@ -92,6 +93,7 @@ export async function POST(request: NextRequest) {
       .select("id");
     if (error) {
       insertErrors.push(`Batch ${Math.floor(i / batchSize) + 1}: ${error.message}`);
+      logApiError("upload", error.message, { userId: user.id, batch: Math.floor(i / batchSize) + 1 });
     } else {
       insertedCount += data?.length ?? 0;
     }

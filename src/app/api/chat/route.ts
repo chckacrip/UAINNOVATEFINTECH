@@ -4,12 +4,13 @@ import { buildChatContext } from "@/lib/chat-context";
 import { analyzeFinances } from "@/lib/openai";
 import { Transaction } from "@/lib/types";
 import { getHCOLAnalysis } from "@/lib/hcol";
-
-// Why: removed cookie-based getSupabase(). Each handler authenticates
-// via JWT from the Authorization header, making it stateless and
-// independently deployable as a Lambda function.
+import { rateLimit } from "@/lib/rate-limit";
+import { logApiError } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
+  const rateLimitRes = await rateLimit(request, "chat", { max: 30 });
+  if (rateLimitRes) return rateLimitRes;
+
   const auth = await authenticateRequest(request);
   if (isAuthError(auth)) return auth;
   const { supabase, user } = auth;
@@ -109,7 +110,7 @@ export async function POST(request: NextRequest) {
     response = await analyzeFinances(contextJson, question);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error("[api/chat] analyzeFinances failed:", err);
+    logApiError("chat", message, { userId: user.id });
     return NextResponse.json(
       { error: message || "Analysis failed. Check server logs and OPENAI_API_KEY." },
       { status: 500 }

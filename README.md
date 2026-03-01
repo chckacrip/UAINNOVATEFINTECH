@@ -63,6 +63,19 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+### Deploying (e.g. AWS Amplify)
+
+For login to work in production:
+
+1. **Environment variables**  
+   Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in your host’s environment (e.g. Amplify **Environment variables**) so they are available at **build time**. The client bundle needs these to talk to Supabase.
+
+2. **Supabase redirect URLs**  
+   In Supabase **Authentication → URL Configuration**, set:
+   - **Site URL** to your production URL (e.g. `https://main.xxx.amplifyapp.com`).
+   - **Redirect URLs** to include `https://<your-domain>/auth/callback` (and your custom domain if you use one).  
+   Email confirmation and OAuth redirect to `/auth/callback`, which exchanges the code for a session and sets cookies.
+
 ## App Routes
 
 | Route | Description |

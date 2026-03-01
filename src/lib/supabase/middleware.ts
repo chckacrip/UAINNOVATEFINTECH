@@ -35,15 +35,26 @@ export async function updateSession(request: NextRequest) {
 
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser();
 
   const isAuthPage = request.nextUrl.pathname === "/login";
-  const isPublicPage = request.nextUrl.pathname === "/";
+  const isPublicPage =
+    request.nextUrl.pathname === "/" ||
+    request.nextUrl.pathname === "/privacy" ||
+    request.nextUrl.pathname === "/terms";
   const isApiRoute = request.nextUrl.pathname.startsWith("/api/");
+  const isAuthCallback = request.nextUrl.pathname === "/auth/callback";
 
-  // Why: API routes handle their own JWT auth — middleware skips them.
-  if (isApiRoute) {
+  if (isApiRoute || isAuthCallback) {
     return response;
+  }
+
+  // Expired or invalid session: send to home with message
+  if (authError && !isPublicPage) {
+    const url = new URL("/", request.url);
+    url.searchParams.set("session_expired", "1");
+    return NextResponse.redirect(url);
   }
 
   if (!user && !isAuthPage && !isPublicPage) {
