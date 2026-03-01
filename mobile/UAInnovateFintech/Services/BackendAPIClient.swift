@@ -114,10 +114,10 @@ final class BackendAPIClient {
         return w.messages ?? []
     }
 
-    func chat(question: String, accessToken: String?) async throws -> String {
+    func chat(question: String, accessToken: String?) async throws -> AnalystResponse? {
         let body = try JSONEncoder().encode(ChatRequest(question: question))
         let response: ChatPostResponse = try await request(path: "api/chat", method: "POST", body: body, accessToken: accessToken)
-        return response.response?.explanation ?? ""
+        return response.response
     }
 }
 

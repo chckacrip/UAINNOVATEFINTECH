@@ -123,8 +123,16 @@ struct ChatPostResponse: Codable {
     let response: AnalystResponse?
 }
 
+struct RecommendedAction: Codable {
+    let action: String
+    let estimated_monthly_impact: Double?
+}
+
 struct AnalystResponse: Codable {
     let explanation: String?
+    let insights: [String]?
+    let risks: [String]?
+    let recommended_actions: [RecommendedAction]?
 }
 
 struct ChatMessage: Codable, Identifiable {
@@ -132,6 +140,7 @@ struct ChatMessage: Codable, Identifiable {
     let user_id: String?
     let role: String
     let content: String
+    let metadata: AnalystResponse?
     let created_at: String?
 }
 

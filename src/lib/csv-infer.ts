@@ -3,17 +3,21 @@ import { getOpenAI } from "./openai";
 export type CSVColumnMapping = {
   date: string;
   description: string;
-  amount: string;
+  amount?: string;
+  credit?: string;
+  debit?: string;
 };
 
 const INFER_SYSTEM = `You are a CSV column detector for bank/transaction exports.
-Given a CSV sample (header row + a few data rows), identify which column is:
+Given a CSV sample (header row + a few data rows), identify columns for:
 - date: transaction or posting date (any date format)
 - description: memo, narrative, payee, or transaction description
-- amount: money amount (may be debit/credit, one column or two; if two, prefer a single "amount" column or use the one that represents the transaction value)
+- amount/credit/debit: either (1) a single "amount" column (signed: negative = outflow, positive = inflow), or (2) separate "credit" and "debit" columns where each row has a value in one and empty in the other (credits = money in, debits = money out)
 
-Respond with JSON only: { "date": "<exact header name>", "description": "<exact header name>", "amount": "<exact header name>" }
-Use the exact column headers as they appear in the CSV (case-sensitive). If you cannot identify a column, use null for that key. We need all three.`;
+Respond with JSON only. Use exact column headers as they appear (case-sensitive).
+Option A — single amount column: { "date": "<header>", "description": "<header>", "amount": "<header>" }
+Option B — credits and debits: { "date": "<header>", "description": "<header>", "credit": "<header>", "debit": "<header>" }
+We need date and description plus either amount OR both credit and debit. Use null for any key you cannot identify.`;
 
 /**
  * Uses GPT to infer which CSV columns map to date, description, and amount.
@@ -42,8 +46,10 @@ export async function inferCSVMapping(csvSample: string): Promise<CSVColumnMappi
     const date = parsed.date ?? null;
     const description = parsed.description ?? null;
     const amount = parsed.amount ?? null;
-    if (date && description && amount) {
-      return { date, description, amount };
+    const credit = parsed.credit ?? null;
+    const debit = parsed.debit ?? null;
+    if (date && description && (amount || (credit && debit))) {
+      return { date, description, ...(amount ? { amount } : { credit: credit!, debit: debit! }) };
     }
   } catch {
     // ignore

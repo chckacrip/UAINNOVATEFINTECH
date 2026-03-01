@@ -16,7 +16,9 @@ export interface ParsedRow {
 
 const DATE_COLUMN_NAMES = ["date", "posted_at", "posted", "transaction_date", "trans_date", "posting_date"];
 const DESC_COLUMN_NAMES = ["description", "desc", "memo", "narrative", "details", "transaction", "name"];
-const AMOUNT_COLUMN_NAMES = ["amount", "total", "value", "sum", "debit", "credit"];
+const AMOUNT_COLUMN_NAMES = ["amount", "total", "value", "sum"];
+const CREDIT_COLUMN_NAMES = ["credit", "credits", "deposits", "inflow", "in"];
+const DEBIT_COLUMN_NAMES = ["debit", "debits", "withdrawals", "outflow", "out", "payment"];
 
 function findColumn(headers: string[], candidates: string[]): string | null {
   const lower = headers.map((h) => h.toLowerCase().replace(/[^a-z_]/g, ""));
@@ -45,20 +47,36 @@ export function parseCSV(csvText: string): { rows: ParsedRow[]; errors: string[]
   const dateCol = findColumn(headers, DATE_COLUMN_NAMES);
   const descCol = findColumn(headers, DESC_COLUMN_NAMES);
   const amountCol = findColumn(headers, AMOUNT_COLUMN_NAMES);
+  const creditCol = findColumn(headers, CREDIT_COLUMN_NAMES);
+  const debitCol = findColumn(headers, DEBIT_COLUMN_NAMES);
 
-  if (!dateCol || !descCol || !amountCol) {
+  const hasAmount = !!amountCol;
+  const hasCreditDebit = !!creditCol && !!debitCol;
+
+  if (!dateCol || !descCol) {
     return {
       rows: [],
       errors: [
         `Could not identify required columns. Found: [${headers.join(", ")}]. ` +
-          `Need columns for date (${DATE_COLUMN_NAMES.join("/")}), ` +
-          `description (${DESC_COLUMN_NAMES.join("/")}), ` +
-          `amount (${AMOUNT_COLUMN_NAMES.join("/")}).`,
+          `Need date (${DATE_COLUMN_NAMES.join("/")}), description (${DESC_COLUMN_NAMES.join("/")}), ` +
+          `and either amount (${AMOUNT_COLUMN_NAMES.join("/")}) or both credit (${CREDIT_COLUMN_NAMES.join("/")}) and debit (${DEBIT_COLUMN_NAMES.join("/")}).`,
       ],
     };
   }
 
-  return parseWithColumns(result.data as Record<string, string>[], dateCol, descCol, amountCol);
+  if (hasAmount) {
+    return parseWithColumns(result.data as Record<string, string>[], dateCol, descCol, amountCol, null, null);
+  }
+  if (hasCreditDebit) {
+    return parseWithColumns(result.data as Record<string, string>[], dateCol, descCol, null, creditCol!, debitCol!);
+  }
+  return {
+    rows: [],
+    errors: [
+      `Could not identify amount columns. Found: [${headers.join(", ")}]. ` +
+        `Need amount (${AMOUNT_COLUMN_NAMES.join("/")}) or both credit and debit.`,
+    ],
+  };
 }
 
 /** Whether the parse failed because required columns could not be identified (so GPT inference can be tried). */
@@ -79,25 +97,43 @@ export function parseCSVWithMapping(csvText: string, mapping: CSVColumnMapping):
   }
 
   const headers = result.meta.fields ?? [];
-  const dateCol = headers.find((h) => h === mapping.date) ?? headers.find((h) => h.toLowerCase() === mapping.date.toLowerCase());
-  const descCol = headers.find((h) => h === mapping.description) ?? headers.find((h) => h.toLowerCase() === mapping.description.toLowerCase());
-  const amountCol = headers.find((h) => h === mapping.amount) ?? headers.find((h) => h.toLowerCase() === mapping.amount.toLowerCase());
+  const resolve = (name: string) => headers.find((h) => h === name) ?? headers.find((h) => h.toLowerCase() === name.toLowerCase());
+  const dateCol = resolve(mapping.date);
+  const descCol = resolve(mapping.description);
+  const amountCol = mapping.amount ? resolve(mapping.amount) : null;
+  const creditCol = mapping.credit ? resolve(mapping.credit) : null;
+  const debitCol = mapping.debit ? resolve(mapping.debit) : null;
 
-  if (!dateCol || !descCol || !amountCol) {
+  if (!dateCol || !descCol) {
     return {
       rows: [],
-      errors: [`Mapping columns not found in CSV. Expected: date="${mapping.date}", description="${mapping.description}", amount="${mapping.amount}". Found: [${headers.join(", ")}].`],
+      errors: [`Mapping columns not found. Need date and description. Found: [${headers.join(", ")}].`],
     };
   }
+  if (amountCol) {
+    return parseWithColumns(result.data as Record<string, string>[], dateCol, descCol, amountCol, null, null);
+  }
+  if (creditCol && debitCol) {
+    return parseWithColumns(result.data as Record<string, string>[], dateCol, descCol, null, creditCol, debitCol);
+  }
+  return {
+    rows: [],
+    errors: [`Mapping requires amount or both credit and debit. Found: [${headers.join(", ")}].`],
+  };
+}
 
-  return parseWithColumns(result.data as Record<string, string>[], dateCol, descCol, amountCol);
+function parseAmount(raw: string): number {
+  const s = (raw ?? "").replace(/[$,\s]/g, "");
+  return parseFloat(s);
 }
 
 function parseWithColumns(
   data: Record<string, string>[],
   dateCol: string,
   descCol: string,
-  amountCol: string
+  amountCol: string | null,
+  creditCol: string | null,
+  debitCol: string | null
 ): { rows: ParsedRow[]; errors: string[] } {
   const rows: ParsedRow[] = [];
   const errors: string[] = [];
@@ -105,13 +141,24 @@ function parseWithColumns(
   for (let i = 0; i < data.length; i++) {
     const raw = data[i];
     try {
-      const amountStr = (raw[amountCol] ?? "").replace(/[$,\s]/g, "");
-      const amount = parseFloat(amountStr);
+      let amount: number;
+      if (amountCol) {
+        amount = parseAmount(raw[amountCol] ?? "");
+      } else if (creditCol != null && debitCol != null) {
+        const credit = parseAmount(raw[creditCol] ?? "");
+        const debit = parseAmount(raw[debitCol] ?? "");
+        // Credits = money in (positive), debits = money out (store as negative)
+        amount = (Number.isNaN(credit) ? 0 : credit) - (Number.isNaN(debit) ? 0 : debit);
+      } else {
+        throw new Error("Missing amount or credit/debit columns");
+      }
+
+      if (Number.isNaN(amount)) amount = 0;
 
       const parsed = TransactionRowSchema.parse({
         date: raw[dateCol]?.trim(),
         description: raw[descCol]?.trim(),
-        amount: isNaN(amount) ? undefined : amount,
+        amount,
       });
       rows.push(parsed);
     } catch {
