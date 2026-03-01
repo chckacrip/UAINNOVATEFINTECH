@@ -17,8 +17,6 @@ import {
   Users,
   RefreshCw,
   CreditCard,
-  Menu,
-  X,
   Plus,
   MoreHorizontal,
 } from "lucide-react";
@@ -46,7 +44,6 @@ export function AppNav() {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState<{ id: string } | null>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [burgerOpen, setBurgerOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const [shortcutsHelpOpen, setShortcutsHelpOpen] = useState(false);
