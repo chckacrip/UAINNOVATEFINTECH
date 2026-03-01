@@ -2,6 +2,7 @@ import SwiftUI
 
 struct LoginView: View {
     @EnvironmentObject var supabase: SupabaseService
+    @Environment(\.colorScheme) private var colorScheme
     @State private var email = ""
     @State private var password = ""
     @State private var isSignUp = false
@@ -12,12 +13,10 @@ struct LoginView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 24) {
-                    Image("motionfi")
+                    Image(colorScheme == .dark ? "darkmode" : "lightmode")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 72, height: 72)
-                    Text("MotionFi")
-                        .font(.title2.bold())
+                        .frame(width: 180, height: 72)
                     Text(isSignUp ? "Create your account" : "Welcome back")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)

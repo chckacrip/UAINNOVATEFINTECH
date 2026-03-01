@@ -326,7 +326,7 @@ export default function DashboardPage() {
 
       {/* Anomaly Alerts */}
       {anomalies.length > 0 && (
-        <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 p-4">
+        <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 px-4 pt-4 pb-5">
           <div className="flex items-center gap-2 mb-3">
             <ShieldAlert className="h-4 w-4 text-amber-600" />
             <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-300">Spending Alerts</h3>

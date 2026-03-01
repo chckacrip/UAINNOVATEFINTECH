@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 import { ThemeToggle } from "./theme-toggle";
 import {
   LayoutDashboard,
@@ -46,6 +45,7 @@ const BURGER_NAV = [
 export function AppNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const [user, setUser] = useState<{ id: string } | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [burgerOpen, setBurgerOpen] = useState(false);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
@@ -53,22 +53,25 @@ export function AppNav() {
   const burgerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user: u } }) => setUser(u ?? null));
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) =>
+      setUser(session?.user ?? null)
+    );
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
     const closeBurger = (e: MouseEvent) => {
-      if (burgerRef.current && !burgerRef.current.contains(e.target as Node)) setBurgerOpen(false);
+      if (burgerRef.current && !burgerRef.current.contains(e.target as Node)) {
+        setBurgerOpen(false);
+      }
     };
     if (burgerOpen) document.addEventListener("click", closeBurger);
     return () => document.removeEventListener("click", closeBurger);
   }, [burgerOpen]);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || (e.target as HTMLElement).getAttribute("contenteditable") === "true") return;
-      if (e.key === "?" && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); setShortcutsHelpOpen(true); }
-      if ((e.key === "n" || e.key === "N") && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); setQuickAddOpen(true); }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
 
   const handleSignOut = async () => {
     const supabase = createClient();
@@ -77,21 +80,43 @@ export function AppNav() {
   };
 
   const linkClass = (isActive: boolean) =>
-    `flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors whitespace-nowrap ${
+    `flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors whitespace-nowrap ${
       isActive
         ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
         : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
     }`;
 
   return (
-    <nav className="border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-      <div className="w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3">
-        <div className="flex items-center gap-4 md:gap-6">
-          <Link href="/dashboard" className="flex items-center gap-2 shrink-0">
-            <Image src="/motionfi.png" alt="MotionFi" width={28} height={28} className="h-7 w-7 object-contain" />
-            <span className="font-bold text-slate-900 dark:text-white hidden sm:inline">MotionFi</span>
+    <nav className="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+      
+      {/* Top Bar */}
+      <div className="flex h-16 w-full items-center justify-between px-0">
+
+        {/* LEFT SIDE */}
+        <div className="flex items-center gap-4 min-w-0">
+          
+          {/* Logo — larger: 5rem → 8rem by breakpoint */}
+          <Link href="/dashboard" className="flex items-center">
+            <Image
+              src="/lightmode.png"
+              alt="MotionFi"
+              width={320}
+              height={64}
+              priority
+              className="h-20 sm:h-24 md:h-28 lg:h-32 w-auto dark:hidden"
+            />
+            <Image
+              src="/darkmode.png"
+              alt="MotionFi"
+              width={320}
+              height={64}
+              priority
+              className="hidden h-20 sm:h-24 md:h-28 lg:h-32 w-auto dark:block"
+            />
           </Link>
-          <div className="hidden lg:flex items-center gap-0.5 overflow-x-auto">
+
+          {/* Main Navigation */}
+          <div className="hidden lg:flex items-center gap-1">
             {MAIN_NAV.map((item) => {
               const isActive = pathname === item.href;
               return (
@@ -103,99 +128,75 @@ export function AppNav() {
             })}
           </div>
         </div>
-        <div className="flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => setQuickAddOpen(true)}
-            className="rounded-lg p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-            aria-label="Quick add transaction"
-            title="Quick add transaction"
-          >
-            <Plus className="h-5 w-5" />
-          </button>
-          <div className="relative" ref={burgerRef}>
-            <button
-              type="button"
-              onClick={() => setBurgerOpen((o) => !o)}
-              className="rounded-lg p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-              aria-label="More"
-              title="More"
-            >
-              <MoreHorizontal className="h-5 w-5" />
-            </button>
-            {burgerOpen && (
-              <div className="absolute right-0 top-full mt-1 py-1 w-48 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg z-50">
-                {BURGER_NAV.map((item) => {
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setBurgerOpen(false)}
-                      className={linkClass(isActive) + " flex w-full px-3 py-2"}
-                    >
-                      <item.icon className="h-3.5 w-3.5" />
-                      {item.label}
-                    </Link>
-                  );
-                })}
+
+        {/* RIGHT SIDE */}
+        <div className="flex items-center gap-1 pr-4">
+          {user ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setQuickAddOpen(true)}
+                className="rounded-lg p-1.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                <Plus className="h-5 w-5" />
+              </button>
+
+              <div className="relative" ref={burgerRef}>
+                <button
+                  type="button"
+                  onClick={() => setBurgerOpen((o) => !o)}
+                  className="rounded-lg p-1.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  <MoreHorizontal className="h-5 w-5" />
+                </button>
+
+                {burgerOpen && (
+                  <div className="absolute right-0 top-full mt-2 py-1 w-52 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg z-50">
+                    {BURGER_NAV.map((item) => {
+                      const isActive = pathname === item.href;
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setBurgerOpen(false)}
+                          className={
+                            "flex w-full items-center gap-2 px-3 py-2 text-sm " +
+                            (isActive
+                              ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                              : "text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50")
+                          }
+                        >
+                          <item.icon className="h-4 w-4" />
+                          {item.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={() => setMobileOpen((o) => !o)}
-            className="lg:hidden rounded-lg p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-            aria-label="Toggle menu"
-          >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-          <ThemeToggle />
-          <button
-            onClick={handleSignOut}
-            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition-colors"
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
+
+              <ThemeToggle />
+
+              <button
+                onClick={handleSignOut}
+                className="rounded-lg p-1.5 text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition-colors"
+              >
+                <LogOut className="h-5 w-5" />
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+            >
+              Get Started
+            </Link>
+          )}
         </div>
       </div>
+
       <QuickAddTransaction open={quickAddOpen} onClose={() => setQuickAddOpen(false)} />
       <ShortcutsHelp open={shortcutsHelpOpen} onClose={() => setShortcutsHelpOpen(false)} />
-      {mobileOpen && (
-        <div className="lg:hidden border-t border-slate-200 dark:border-slate-700 px-4 py-3 bg-slate-50 dark:bg-slate-800/50">
-          <div className="flex flex-col gap-0.5">
-            {MAIN_NAV.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={linkClass(isActive)}
-                >
-                  <item.icon className="h-3.5 w-3.5" />
-                  {item.label}
-                </Link>
-              );
-            })}
-            <div className="border-t border-slate-200 dark:border-slate-600 my-1 pt-1" />
-            {BURGER_NAV.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={linkClass(isActive)}
-                >
-                  <item.icon className="h-3.5 w-3.5" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </nav>
   );
 }

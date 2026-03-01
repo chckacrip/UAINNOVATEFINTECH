@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { Mail, Lock, Loader2 } from "lucide-react";
 import Link from "next/link";
 
@@ -48,17 +47,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50 px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-4">
-            <Image src="/motionfi.png" alt="MotionFi" width={36} height={36} className="h-9 w-9 object-contain" />
-            <span className="text-2xl font-bold text-slate-900">MotionFi</span>
-          </Link>
-          <p className="text-slate-600">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50">
+      <div className="flex-1 flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-md text-center">
+          <p className="text-slate-600 mb-8">
             {isSignUp ? "Create your account" : "Welcome back"}
           </p>
-        </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -126,6 +120,7 @@ export default function LoginPage() {
                 : "Don't have an account? Sign up"}
             </button>
           </div>
+        </div>
         </div>
       </div>
     </div>
