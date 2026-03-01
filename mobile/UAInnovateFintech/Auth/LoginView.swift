@@ -72,6 +72,7 @@ struct LoginView: View {
                 }
                 .padding(24)
             }
+            .dismissKeyboardOnTap()
             .navigationBarTitleDisplayMode(.inline)
         }
     }

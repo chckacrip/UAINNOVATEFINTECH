@@ -37,6 +37,7 @@
 		B1000000000000000000001C /* MoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000001D /* MoreView.swift */; };
 		B1000000000000000000001D /* DashboardHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000020 /* DashboardHelper.swift */; };
 		B1000000000000000000001E /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000000000000000000001E /* AppTheme.swift */; };
+		B10000000000000000000022 /* DismissKeyboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F10000000000000000000022 /* DismissKeyboard.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -71,6 +72,7 @@
 		F1000000000000000000001E /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		F10000000000000000000020 /* DashboardHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardHelper.swift; sourceTree = "<group>"; };
 		F10000000000000000000021 /* motionfi.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = motionfi.png; sourceTree = "<group>"; };
+		F10000000000000000000022 /* DismissKeyboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DismissKeyboard.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,6 +104,7 @@
 				G10000000000000000000005 /* Services */,
 				G10000000000000000000006 /* Models */,
 				G10000000000000000000007 /* Auth */,
+				G1000000000000000000000B /* Extensions */,
 				G10000000000000000000009 /* Theme */,
 				G10000000000000000000008 /* Views */,
 				F1000000000000000000000D /* Config.plist */,
@@ -125,6 +128,14 @@
 				F10000000000000000000003 /* AppConfig.swift */,
 			);
 			path = Config;
+			sourceTree = "<group>";
+		};
+		G1000000000000000000000B /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				F10000000000000000000022 /* DismissKeyboard.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 		G10000000000000000000005 /* Services */ = {
@@ -284,6 +295,7 @@
 				B1000000000000000000001B /* SettingsView.swift in Sources */,
 				B1000000000000000000001C /* MoreView.swift in Sources */,
 				B1000000000000000000001E /* AppTheme.swift in Sources */,
+				B10000000000000000000022 /* DismissKeyboard.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

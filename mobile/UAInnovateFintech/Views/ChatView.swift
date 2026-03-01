@@ -68,6 +68,7 @@ struct ChatView: View {
                         }
                         .padding(.vertical, 12)
                     }
+                    .dismissKeyboardOnTap()
                     .onChange(of: messages.count) { _ in
                         if let last = messages.last {
                             withAnimation(.easeOut(duration: 0.2)) {

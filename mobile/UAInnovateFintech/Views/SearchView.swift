@@ -109,6 +109,7 @@ struct SearchView: View {
                     }
                 }
             }
+            .dismissKeyboardOnTap()
             .navigationTitle("Search")
             .task { await load() }
         }
