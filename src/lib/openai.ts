@@ -2,7 +2,10 @@ import OpenAI from "openai";
 import { AnalystResponse } from "./types";
 
 export function getOpenAI() {
-  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  // TEMPORARY: remove after verifying env on Amplify
+  const key = process.env.OPENAI_API_KEY;
+  console.log("[openai] OPENAI_API_KEY:", key ? `${key.slice(0, 12)}...` : "(missing)");
+  return new OpenAI({ apiKey: key });
 }
 
 const SYSTEM_PROMPT = `You are FinanceCopilot, a friendly personal financial analyst and accountant. 
