@@ -1,5 +1,6 @@
 import Papa from "papaparse";
 import { z } from "zod";
+import type { CSVColumnMapping } from "./csv-infer";
 
 const TransactionRowSchema = z.object({
   date: z.string().min(1),
@@ -7,7 +8,7 @@ const TransactionRowSchema = z.object({
   amount: z.number(),
 });
 
-interface ParsedRow {
+export interface ParsedRow {
   date: string;
   description: string;
   amount: number;
@@ -57,13 +58,54 @@ export function parseCSV(csvText: string): { rows: ParsedRow[]; errors: string[]
     };
   }
 
+  return parseWithColumns(result.data as Record<string, string>[], dateCol, descCol, amountCol);
+}
+
+/** Whether the parse failed because required columns could not be identified (so GPT inference can be tried). */
+export const COULD_NOT_IDENTIFY_COLUMNS = "Could not identify required columns";
+
+export function parseCSVWithMapping(csvText: string, mapping: CSVColumnMapping): { rows: ParsedRow[]; errors: string[] } {
+  const result = Papa.parse(csvText, {
+    header: true,
+    skipEmptyLines: true,
+    transformHeader: (h: string) => h.trim(),
+  });
+
+  if (result.errors.length > 0 && result.data.length === 0) {
+    return {
+      rows: [],
+      errors: result.errors.map((e) => `Row ${e.row}: ${e.message}`),
+    };
+  }
+
+  const headers = result.meta.fields ?? [];
+  const dateCol = headers.find((h) => h === mapping.date) ?? headers.find((h) => h.toLowerCase() === mapping.date.toLowerCase());
+  const descCol = headers.find((h) => h === mapping.description) ?? headers.find((h) => h.toLowerCase() === mapping.description.toLowerCase());
+  const amountCol = headers.find((h) => h === mapping.amount) ?? headers.find((h) => h.toLowerCase() === mapping.amount.toLowerCase());
+
+  if (!dateCol || !descCol || !amountCol) {
+    return {
+      rows: [],
+      errors: [`Mapping columns not found in CSV. Expected: date="${mapping.date}", description="${mapping.description}", amount="${mapping.amount}". Found: [${headers.join(", ")}].`],
+    };
+  }
+
+  return parseWithColumns(result.data as Record<string, string>[], dateCol, descCol, amountCol);
+}
+
+function parseWithColumns(
+  data: Record<string, string>[],
+  dateCol: string,
+  descCol: string,
+  amountCol: string
+): { rows: ParsedRow[]; errors: string[] } {
   const rows: ParsedRow[] = [];
   const errors: string[] = [];
 
-  for (let i = 0; i < result.data.length; i++) {
-    const raw = result.data[i] as Record<string, string>;
+  for (let i = 0; i < data.length; i++) {
+    const raw = data[i];
     try {
-      const amountStr = (raw[amountCol] || "").replace(/[$,\s]/g, "");
+      const amountStr = (raw[amountCol] ?? "").replace(/[$,\s]/g, "");
       const amount = parseFloat(amountStr);
 
       const parsed = TransactionRowSchema.parse({

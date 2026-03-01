@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateRequest, isAuthError } from "@/lib/supabase/api-auth";
-import { parseCSV, normalizeRows } from "@/lib/csv-parser";
+import { parseCSV, parseCSVWithMapping, normalizeRows, COULD_NOT_IDENTIFY_COLUMNS } from "@/lib/csv-parser";
+import { inferCSVMapping } from "@/lib/csv-infer";
 import { categorizeTransactions } from "@/lib/categorize";
 import { transactionHash } from "@/lib/tx-hash";
 
@@ -25,7 +26,22 @@ export async function POST(request: NextRequest) {
 
   // Why: file processed entirely in-memory — no fs writes.
   const csvText = await file.text();
-  const { rows, errors } = parseCSV(csvText);
+  let result = parseCSV(csvText);
+  let { rows, errors } = result;
+
+  // If heuristic column detection failed, use GPT to infer column mapping.
+  if (rows.length === 0 && errors.some((e) => e.includes(COULD_NOT_IDENTIFY_COLUMNS))) {
+    try {
+      const mapping = await inferCSVMapping(csvText);
+      if (mapping) {
+        result = parseCSVWithMapping(csvText, mapping);
+        rows = result.rows;
+        errors = result.errors;
+      }
+    } catch {
+      // Keep original errors if GPT inference fails
+    }
+  }
 
   if (rows.length === 0) {
     return NextResponse.json({

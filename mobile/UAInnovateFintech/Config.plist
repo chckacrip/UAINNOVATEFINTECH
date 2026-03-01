@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>BACKEND_BASE_URL</key>
-	<string>https://your-next-app.vercel.app</string>
+	<string>http://10.122.29.168:3000</string>
 	<key>SUPABASE_URL</key>
 	<string>https://cupyyaefoqxmbskbegka.supabase.co</string>
 	<key>SUPABASE_ANON_KEY</key>
