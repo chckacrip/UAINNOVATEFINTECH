@@ -33,6 +33,9 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
+  // Refresh session if possible (e.g. expired access token but valid refresh token)
+  await supabase.auth.getSession();
+
   const {
     data: { user },
     error: authError,
@@ -50,10 +53,13 @@ export async function updateSession(request: NextRequest) {
     return response;
   }
 
-  // Expired or invalid session: send to home with message
-  if (authError && !isPublicPage) {
-    const url = new URL("/", request.url);
-    url.searchParams.set("session_expired", "1");
+  // Auth error (expired/invalid token): redirect unless already on login (avoids redirect loop)
+  if (authError && !isPublicPage && !isAuthPage) {
+    const message = (authError.message ?? "").toLowerCase();
+    const isExpired =
+      message.includes("expired") || message.includes("jwt") || message.includes("refresh");
+    const url = new URL(isExpired ? "/" : "/login", request.url);
+    if (isExpired) url.searchParams.set("session_expired", "1");
     return NextResponse.redirect(url);
   }
 

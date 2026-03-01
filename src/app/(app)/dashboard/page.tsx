@@ -295,9 +295,9 @@ export default function DashboardPage() {
         hasTransactions={transactions.length > 0}
         hasGoal={goals.length > 0 && goals.some((g) => g.target_amount > 0)}
       />
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Dashboard</h1>
           <p className="text-slate-600 dark:text-slate-400 text-sm">
             {displaySummary.month} &middot; {filteredByPreset.length} transactions
           </p>
@@ -307,7 +307,7 @@ export default function DashboardPage() {
             <button
               key={preset}
               onClick={() => setDatePreset(preset)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+              className={`rounded-lg px-3 py-2.5 sm:py-1.5 text-xs font-medium transition-colors touch-manipulation min-h-[44px] sm:min-h-0 ${
                 datePreset === preset
                   ? "bg-blue-600 text-white dark:bg-blue-500"
                   : "border border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700"
@@ -317,14 +317,14 @@ export default function DashboardPage() {
             </button>
           ))}
         </div>
-        <div className="flex gap-2 no-print">
-          <button onClick={() => exportToCSV(transactions)} className="flex items-center gap-1.5 rounded-lg border border-slate-300 dark:border-slate-600 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+        <div className="flex flex-wrap gap-2 no-print">
+          <button onClick={() => exportToCSV(transactions)} className="flex items-center gap-1.5 rounded-lg border border-slate-300 dark:border-slate-600 px-3 py-2.5 sm:py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors touch-manipulation min-h-[44px] sm:min-h-0">
             <Download className="h-3.5 w-3.5" /> CSV
           </button>
-          <button onClick={() => exportMonthlyReportPDF(displaySummary, goals.map((g) => ({ ...g, saved: 0 })))} className="flex items-center gap-1.5 rounded-lg border border-slate-300 dark:border-slate-600 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+          <button onClick={() => exportMonthlyReportPDF(displaySummary, goals.map((g) => ({ ...g, saved: 0 })))} className="flex items-center gap-1.5 rounded-lg border border-slate-300 dark:border-slate-600 px-3 py-2.5 sm:py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors touch-manipulation min-h-[44px] sm:min-h-0">
             <Printer className="h-3.5 w-3.5" /> PDF report
           </button>
-          <button onClick={exportToPrintPDF} className="flex items-center gap-1.5 rounded-lg border border-slate-300 dark:border-slate-600 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+          <button onClick={exportToPrintPDF} className="flex items-center gap-1.5 rounded-lg border border-slate-300 dark:border-slate-600 px-3 py-2.5 sm:py-2 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors touch-manipulation min-h-[44px] sm:min-h-0">
             <Printer className="h-3.5 w-3.5" /> Print
           </button>
         </div>

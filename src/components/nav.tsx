@@ -19,6 +19,7 @@ import {
   CreditCard,
   Plus,
   MoreHorizontal,
+  User,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { QuickAddTransaction } from "./quick-add-transaction";
@@ -33,6 +34,7 @@ const MAIN_NAV = [
 ];
 
 const BURGER_NAV = [
+  { href: "/profile", label: "Profile", icon: User },
   { href: "/net-worth", label: "Net Worth", icon: PiggyBank },
   { href: "/debt", label: "Debt", icon: CreditCard },
   { href: "/tax", label: "Tax", icon: Calculator },
@@ -50,7 +52,13 @@ export function AppNav() {
   const burgerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const supabase = createClient();
+    let supabase;
+    try {
+      supabase = createClient();
+    } catch {
+      setUser(null);
+      return;
+    }
     supabase.auth.getUser().then(({ data: { user: u } }) => setUser(u ?? null));
     const {
       data: { subscription },
@@ -71,84 +79,99 @@ export function AppNav() {
   }, [burgerOpen]);
 
   const handleSignOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch {
+      // e.g. missing env; still send user home
+    }
     router.push("/");
   };
 
   const linkClass = (isActive: boolean) =>
-    `flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors whitespace-nowrap ${
+    `flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
       isActive
-        ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
-        : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+        ? "bg-blue-500/15 dark:bg-blue-500/20 text-blue-600 dark:text-blue-300"
+        : "text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
     }`;
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+    <>
+    <nav className="sticky top-0 z-50 border-b border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900 backdrop-blur-md pt-[env(safe-area-inset-top)]">
       
-      {/* Top Bar */}
-      <div className="flex h-16 w-full items-center justify-between px-0">
+      {/* Top Bar — compact on mobile */}
+      <div className="flex h-14 sm:h-16 w-full items-center justify-between gap-2 px-4 sm:px-6">
 
-        {/* LEFT SIDE */}
-        <div className="flex items-center gap-4 min-w-0">
-          
-          {/* Logo — larger: 5rem → 8rem by breakpoint */}
-          <Link href="/dashboard" className="flex items-center">
+        {/* LEFT: Logo — smaller on mobile */}
+        <div className="flex items-center min-w-0 shrink">
+          <Link href="/dashboard" className="flex items-center" aria-label="MotionFi home">
             <Image
               src="/lightmode.png"
-              alt="MotionFi"
-              width={320}
-              height={64}
+              alt=""
+              width={200}
+              height={40}
               priority
-              className="h-20 sm:h-24 md:h-28 lg:h-32 w-auto dark:hidden"
+              className="h-8 sm:h-10 md:h-12 lg:h-14 w-auto dark:hidden"
             />
             <Image
               src="/darkmode.png"
-              alt="MotionFi"
-              width={320}
-              height={64}
+              alt=""
+              width={200}
+              height={40}
               priority
-              className="hidden h-20 sm:h-24 md:h-28 lg:h-32 w-auto dark:block"
+              className="hidden h-8 sm:h-10 md:h-12 lg:h-14 w-auto dark:block"
             />
           </Link>
-
-          {/* Main Navigation */}
-          <div className="hidden lg:flex items-center gap-1">
-            {MAIN_NAV.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link key={item.href} href={item.href} className={linkClass(isActive)}>
-                  <item.icon className="h-3.5 w-3.5" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </div>
         </div>
 
-        {/* RIGHT SIDE */}
-        <div className="flex items-center gap-1 pr-4">
+        {/* CENTER: Main nav on desktop */}
+        <div className="hidden lg:flex items-center gap-0.5 flex-1 justify-center">
+          {MAIN_NAV.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link key={item.href} href={item.href} className={linkClass(isActive)}>
+                <item.icon className="h-3.5 w-3.5" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* RIGHT SIDE — touch-friendly on mobile */}
+        <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
           {user ? (
             <>
               <button
                 type="button"
                 onClick={() => setQuickAddOpen(true)}
-                className="rounded-lg p-1.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="rounded-lg p-2.5 sm:p-1.5 text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center sm:min-h-0 sm:min-w-0 transition-colors"
+                aria-label="Quick add transaction"
               >
                 <Plus className="h-5 w-5" />
               </button>
+
+              <Link
+                href="/profile"
+                className={`${linkClass(pathname === "/profile")} touch-manipulation min-h-[44px] min-w-[44px] justify-center sm:min-h-0 sm:min-w-0 sm:px-2.5 sm:py-1.5`}
+                aria-label="Profile"
+              >
+                <User className="h-5 w-5 sm:h-4 sm:w-4 shrink-0" />
+                <span className="hidden sm:inline">Profile</span>
+              </Link>
 
               <div className="relative" ref={burgerRef}>
                 <button
                   type="button"
                   onClick={() => setBurgerOpen((o) => !o)}
-                  className="rounded-lg p-1.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  className="rounded-lg p-2.5 sm:p-1.5 text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center gap-1.5 sm:min-h-0 sm:min-w-0 transition-colors"
+                  aria-label="More menu"
                 >
-                  <MoreHorizontal className="h-5 w-5" />
+                  <MoreHorizontal className="h-5 w-5 shrink-0" />
+                  <span className="hidden sm:inline text-sm font-medium">More</span>
                 </button>
 
                 {burgerOpen && (
-                  <div className="absolute right-0 top-full mt-2 py-1 w-52 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg z-50">
+                  <div className="absolute right-0 top-full mt-2 py-1 w-52 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 shadow-xl z-50">
                     {BURGER_NAV.map((item) => {
                       const isActive = pathname === item.href;
                       return (
@@ -157,9 +180,9 @@ export function AppNav() {
                           href={item.href}
                           onClick={() => setBurgerOpen(false)}
                           className={
-                            "flex w-full items-center gap-2 px-3 py-2 text-sm " +
+                            "flex w-full items-center gap-2 px-3 py-2.5 text-sm " +
                             (isActive
-                              ? "bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
+                              ? "bg-blue-500/15 dark:bg-blue-500/20 text-blue-600 dark:text-blue-300"
                               : "text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50")
                           }
                         >
@@ -176,7 +199,8 @@ export function AppNav() {
 
               <button
                 onClick={handleSignOut}
-                className="rounded-lg p-1.5 text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition-colors"
+                className="rounded-lg p-2.5 sm:p-1.5 text-slate-600 dark:text-slate-200 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-400 transition-colors touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center sm:min-h-0 sm:min-w-0"
+                aria-label="Sign out"
               >
                 <LogOut className="h-5 w-5" />
               </button>
@@ -184,9 +208,9 @@ export function AppNav() {
           ) : (
             <Link
               href="/login"
-              className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors min-h-[44px] flex items-center justify-center touch-manipulation"
             >
-              Get Started
+              Log in
             </Link>
           )}
         </div>
@@ -195,5 +219,31 @@ export function AppNav() {
       <QuickAddTransaction open={quickAddOpen} onClose={() => setQuickAddOpen(false)} />
       <ShortcutsHelp open={shortcutsHelpOpen} onClose={() => setShortcutsHelpOpen(false)} />
     </nav>
+
+      {/* Mobile bottom nav — main links when logged in */}
+      {user && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden no-print border-t border-slate-200 dark:border-slate-700/80 bg-white dark:bg-slate-900 backdrop-blur-md pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+          <div className="flex items-center justify-around h-14">
+            {MAIN_NAV.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-2 text-xs font-medium transition-colors touch-manipulation min-h-[44px] ${
+                    isActive
+                      ? "text-blue-600 dark:text-blue-400"
+                      : "text-slate-500 dark:text-slate-300 active:bg-slate-100 dark:active:bg-slate-800"
+                  }`}
+                >
+                  <item.icon className="h-5 w-5 shrink-0" />
+                  <span className="truncate max-w-[80px]">{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </>
   );
 }

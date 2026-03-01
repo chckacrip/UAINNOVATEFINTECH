@@ -44,7 +44,14 @@ function LoginForm() {
     setError("");
     setMessage("");
 
-    const supabase = createClient();
+    let supabase;
+    try {
+      supabase = createClient();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "App is misconfigured. Check the console.");
+      setLoading(false);
+      return;
+    }
 
     if (forgotPassword) {
       const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
@@ -71,7 +78,8 @@ function LoginForm() {
         setMessage("Check your email to confirm your account before signing in.");
       } else {
         router.refresh();
-        router.push("/onboarding");
+        window.location.href = "/onboarding";
+        return;
       }
     } else {
       const { error: err } = await supabase.auth.signInWithPassword({
@@ -82,17 +90,18 @@ function LoginForm() {
         setError(err.message);
       } else {
         router.refresh();
-        router.push("/dashboard");
+        window.location.href = "/dashboard";
+        return;
       }
     }
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
-      <div className="flex-1 flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen min-h-[100dvh] flex flex-col bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+      <div className="flex-1 flex items-center justify-center px-4 py-6 sm:py-8">
         <div className="w-full max-w-md text-center">
-          <p className="text-slate-600 dark:text-slate-400 mb-8">
+          <p className="text-slate-600 dark:text-slate-400 mb-6 sm:mb-8 text-sm sm:text-base">
             {forgotPassword
               ? "Reset your password"
               : isSignUp
@@ -100,8 +109,8 @@ function LoginForm() {
                 : "Welcome back"}
           </p>
 
-          <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-8 shadow-sm">
-            <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 sm:p-8 shadow-sm">
+          <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                   Email
@@ -113,8 +122,8 @@ function LoginForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 pl-10 pr-4 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-slate-900 dark:text-white"
-                    placeholder="you@example.com"
+                  className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 pl-10 pr-4 py-3 text-base sm:text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-slate-900 dark:text-white touch-manipulation"
+                  placeholder="you@example.com"
                   />
                 </div>
               </div>
@@ -132,8 +141,8 @@ function LoginForm() {
                       onChange={(e) => setPassword(e.target.value)}
                       required={!forgotPassword}
                       minLength={6}
-                      className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 pl-10 pr-4 py-2.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-slate-900 dark:text-white"
-                      placeholder="••••••••"
+                  className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 pl-10 pr-4 py-3 text-base sm:text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-slate-900 dark:text-white touch-manipulation"
+                  placeholder="••••••••"
                     />
                   </div>
                   {isSignUp && pwdStrength.hint && (
@@ -162,7 +171,7 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={loading || (isSignUp && isPasswordWeak)}
-                className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                className="w-full rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 touch-manipulation min-h-[48px]"
               >
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 {forgotPassword
@@ -195,7 +204,7 @@ function LoginForm() {
                       setError("");
                       setMessage("");
                     }}
-                    className="block w-full text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                    className="block w-full text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium py-2.5 touch-manipulation min-h-[44px] flex items-center justify-center"
                   >
                     {isSignUp
                       ? "Already have an account? Sign in"
@@ -209,7 +218,7 @@ function LoginForm() {
                         setError("");
                         setMessage("");
                       }}
-                      className="block w-full text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+                      className="block w-full text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 py-2.5 touch-manipulation min-h-[44px]"
                     >
                       Forgot password?
                     </button>
