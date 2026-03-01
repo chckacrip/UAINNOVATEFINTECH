@@ -46,9 +46,13 @@ export default function ChatPage() {
       try {
         const res = await apiFetch("/api/chat");
         const data = await res.json();
-        setMessages(data.messages ?? []);
-      } catch {
-        // Ignore
+        if (res.ok && Array.isArray(data.messages)) {
+          setMessages(data.messages);
+        } else if (!res.ok) {
+          console.warn("[Chat] loadHistory:", res.status, data?.error ?? data);
+        }
+      } catch (e) {
+        console.warn("[Chat] loadHistory failed:", e);
       }
       setHistoryLoading(false);
     };
@@ -234,17 +238,22 @@ function AssistantMessage({
   metadata,
 }: {
   content: string;
-  metadata?: AnalystResponse;
+  metadata?: AnalystResponse | null;
 }) {
   if (!metadata) {
     return <p className="text-sm text-slate-700 dark:text-slate-300">{content}</p>;
   }
 
+  const insights = Array.isArray(metadata.insights) ? metadata.insights : [];
+  const risks = Array.isArray(metadata.risks) ? metadata.risks : [];
+  const actions = Array.isArray(metadata.recommended_actions) ? metadata.recommended_actions : [];
+  const explanation = typeof metadata.explanation === "string" ? metadata.explanation : content;
+
   return (
     <div className="space-y-3">
-      <p className="text-sm text-slate-700 dark:text-slate-300">{metadata.explanation}</p>
+      <p className="text-sm text-slate-700 dark:text-slate-300">{explanation}</p>
 
-      {metadata.insights.length > 0 && (
+      {insights.length > 0 && (
         <div>
           <div className="flex items-center gap-1.5 mb-1.5">
             <Lightbulb className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400" />
@@ -253,7 +262,7 @@ function AssistantMessage({
             </span>
           </div>
           <ul className="space-y-1">
-            {metadata.insights.map((item, i) => (
+            {insights.map((item, i) => (
               <li key={i} className="text-sm text-slate-600 dark:text-slate-300 pl-5 relative before:content-['•'] before:absolute before:left-1.5 before:text-blue-400 dark:before:text-blue-400">
                 {item}
               </li>
@@ -262,7 +271,7 @@ function AssistantMessage({
         </div>
       )}
 
-      {metadata.risks.length > 0 && (
+      {risks.length > 0 && (
         <div>
           <div className="flex items-center gap-1.5 mb-1.5">
             <AlertTriangle className="h-3.5 w-3.5 text-red-500 dark:text-red-400" />
@@ -271,7 +280,7 @@ function AssistantMessage({
             </span>
           </div>
           <ul className="space-y-1">
-            {metadata.risks.map((item, i) => (
+            {risks.map((item, i) => (
               <li key={i} className="text-sm text-slate-600 dark:text-slate-300 pl-5 relative before:content-['•'] before:absolute before:left-1.5 before:text-red-400 dark:before:text-red-400">
                 {item}
               </li>
@@ -280,7 +289,7 @@ function AssistantMessage({
         </div>
       )}
 
-      {metadata.recommended_actions.length > 0 && (
+      {actions.length > 0 && (
         <div>
           <div className="flex items-center gap-1.5 mb-1.5">
             <ListChecks className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400" />
@@ -289,7 +298,7 @@ function AssistantMessage({
             </span>
           </div>
           <ul className="space-y-1.5">
-            {metadata.recommended_actions.map((item, i) => (
+            {actions.map((item, i) => (
               <li key={i} className="text-sm text-slate-600 dark:text-slate-300 pl-5 relative before:content-['→'] before:absolute before:left-0.5 before:text-emerald-500 dark:before:text-emerald-400">
                 {item.action}
                 {item.estimated_monthly_impact > 0 && (
