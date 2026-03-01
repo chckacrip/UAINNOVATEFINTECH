@@ -31,6 +31,7 @@ import { CashFlowForecast } from "@/components/cash-flow-forecast";
 import { OnboardingChecklist } from "@/components/onboarding-checklist";
 import { OnboardingTour } from "@/components/onboarding-tour";
 import { DashboardSkeleton } from "@/components/skeleton";
+import { MoneyStoryCard } from "@/components/money-story-card";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -329,6 +330,8 @@ export default function DashboardPage() {
           </button>
         </div>
       </div>
+
+      <MoneyStoryCard />
 
       {/* Anomaly Alerts */}
       {anomalies.length > 0 && (

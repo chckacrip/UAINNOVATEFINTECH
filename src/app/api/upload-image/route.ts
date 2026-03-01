@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authenticateRequest, isAuthError } from "@/lib/supabase/api-auth";
 import OpenAI from "openai";
+import { pdfToPng } from "pdf-to-png-converter";
 import { categorizeTransactions } from "@/lib/categorize";
 import { transactionHash } from "@/lib/tx-hash";
 
@@ -50,19 +51,39 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const validTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp", "image/gif"];
+  const validTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp", "image/gif", "application/pdf"];
   if (!validTypes.includes(file.type)) {
     return NextResponse.json({
       success: false,
       inserted: 0,
-      errors: ["Unsupported image format. Use PNG, JPG, or WebP."],
+      errors: ["Unsupported format. Use PNG, JPG, WebP, or PDF."],
     }, { status: 400 });
   }
 
-  // Why: image processed entirely in-memory via ArrayBuffer — no temp files.
-  const bytes = await file.arrayBuffer();
-  const base64 = Buffer.from(bytes).toString("base64");
-  const dataUri = `data:${file.type};base64,${base64}`;
+  let dataUri: string;
+
+  if (file.type === "application/pdf") {
+    const bytes = await file.arrayBuffer();
+    const pngPages = await pdfToPng(bytes, {
+      returnPageContent: true,
+      pagesToProcess: [1],
+      viewportScale: 2,
+    });
+    const firstPage = pngPages[0];
+    if (!firstPage?.content) {
+      return NextResponse.json({
+        success: false,
+        inserted: 0,
+        errors: ["Could not convert PDF to image. Try a different file or use an image instead."],
+      }, { status: 400 });
+    }
+    const base64 = firstPage.content.toString("base64");
+    dataUri = `data:image/png;base64,${base64}`;
+  } else {
+    const bytes = await file.arrayBuffer();
+    const base64 = Buffer.from(bytes).toString("base64");
+    dataUri = `data:${file.type};base64,${base64}`;
+  }
 
   // Why: client created per-request from env var, not cached at module level.
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -148,7 +169,7 @@ export async function POST(request: NextRequest) {
     currency: "USD",
     category: overriddenCategories[i] ?? categorized[i].category,
     merchant: (row.merchant || categorized[i].merchant) ?? "",
-    source_file: isReceipt ? `receipt:${file.name}` : `screenshot:${file.name}`,
+    source_file: isReceipt ? `receipt:${file.name}` : file.type === "application/pdf" ? `pdf:${file.name}` : `screenshot:${file.name}`,
   }));
 
   const { error, data } = await supabase

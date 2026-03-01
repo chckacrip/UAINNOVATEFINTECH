@@ -170,33 +170,63 @@ function parseWithColumns(
 }
 
 function normalizeDate(dateStr: string): string {
-  const formats = [
-    /^(\d{4})-(\d{2})-(\d{2})$/,       // YYYY-MM-DD
-    /^(\d{2})\/(\d{2})\/(\d{4})$/,       // MM/DD/YYYY
-    /^(\d{2})-(\d{2})-(\d{4})$/,         // MM-DD-YYYY
-    /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/, // M/D/YY or M/D/YYYY
-  ];
+  const trimmed = dateStr.trim();
+  // YYYY-MM-DD (and validate)
+  const isoDash = /^(\d{4})-(\d{2})-(\d{2})$/;
+  let m = trimmed.match(isoDash);
+  if (m) {
+    const month = parseInt(m[2], 10);
+    const day = parseInt(m[3], 10);
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) return trimmed;
+  }
 
-  for (const fmt of formats) {
-    const match = dateStr.match(fmt);
-    if (match) {
-      if (fmt === formats[0]) return dateStr;
-      let year = match[3];
-      if (year.length === 2) year = `20${year}`;
-      const month = match[1].padStart(2, "0");
-      const day = match[2].padStart(2, "0");
-      // For MM/DD/YYYY and MM-DD-YYYY formats
-      if (fmt === formats[0]) return dateStr;
+  // YYYY/MM/DD — must come before M/D/YY so "2025/03/01" isn't parsed as month=2025, year=01
+  const isoSlash = /^(\d{4})\/(\d{1,2})\/(\d{1,2})$/;
+  m = trimmed.match(isoSlash);
+  if (m) {
+    const year = m[1];
+    const month = m[2].padStart(2, "0");
+    const day = m[3].padStart(2, "0");
+    const monthNum = parseInt(month, 10);
+    const dayNum = parseInt(day, 10);
+    if (monthNum >= 1 && monthNum <= 12 && dayNum >= 1 && dayNum <= 31) {
       return `${year}-${month}-${day}`;
     }
   }
 
-  // Fallback: try native parsing
-  const d = new Date(dateStr);
+  // MM/DD/YYYY or MM-DD-YYYY
+  const formats = [
+    { re: /^(\d{2})\/(\d{2})\/(\d{4})$/, sep: true },
+    { re: /^(\d{2})-(\d{2})-(\d{4})$/, sep: true },
+    { re: /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/, sep: false }, // M/D/YY — only when first group <= 12 (month)
+  ];
+
+  for (const { re, sep } of formats) {
+    const match = trimmed.match(re);
+    if (match) {
+      const first = parseInt(match[1], 10);
+      if (!sep && first > 12) continue; // avoid matching YYYY/MM/DD as M/D/YY
+      let year = match[3];
+      if (year.length === 2) year = `20${year}`;
+      const month = match[1].padStart(2, "0");
+      const day = match[2].padStart(2, "0");
+      const monthNum = parseInt(month, 10);
+      const dayNum = parseInt(day, 10);
+      if (monthNum >= 1 && monthNum <= 12 && dayNum >= 1 && dayNum <= 31) {
+        return `${year}-${month}-${day}`;
+      }
+    }
+  }
+
+  const d = new Date(trimmed);
   if (!isNaN(d.getTime())) {
     return d.toISOString().split("T")[0];
   }
-  return dateStr;
+
+  const validYYYYMMDD = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+  if (validYYYYMMDD.test(trimmed)) return trimmed;
+
+  return new Date().toISOString().split("T")[0];
 }
 
 export function normalizeRows(

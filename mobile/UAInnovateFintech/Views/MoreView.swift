@@ -24,6 +24,7 @@ enum AppearanceOption: String, CaseIterable {
 
 struct MoreView: View {
     @AppStorage("appearance") private var appearanceRaw = AppearanceOption.system.rawValue
+    @Environment(\.colorScheme) private var colorScheme
 
     private var appearance: Binding<AppearanceOption> {
         Binding(
@@ -84,6 +85,15 @@ struct MoreView: View {
                 }
             }
             .navigationTitle("More")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Image(colorScheme == .dark ? "darkmode" : "lightmode")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 28)
+                }
+            }
         }
     }
 }

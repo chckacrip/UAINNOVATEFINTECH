@@ -10,6 +10,8 @@ private struct MonthBarPoint: Identifiable {
 
 struct DashboardView: View {
     @EnvironmentObject var supabase: SupabaseService
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var transactions: [Transaction] = []
     @State private var profile: Profile?
     @State private var billReminders: [BillReminder] = []
@@ -18,9 +20,24 @@ struct DashboardView: View {
     @State private var datePreset: DatePreset = .thisMonth
 
     enum DatePreset: String, CaseIterable {
-        case thisMonth = "This month"
-        case last30 = "Last 30 days"
-        case last3Mo = "Last 3 months"
+        case thisMonth
+        case last30
+        case last3Mo
+
+        func label(compact: Bool) -> String {
+            if compact {
+                switch self {
+                case .thisMonth: return "Month"
+                case .last30: return "30d"
+                case .last3Mo: return "3mo"
+                }
+            }
+            switch self {
+            case .thisMonth: return "This month"
+            case .last30: return "Last 30 days"
+            case .last3Mo: return "Last 3 months"
+            }
+        }
     }
 
     private var filteredTransactions: [Transaction] {
@@ -57,7 +74,7 @@ struct DashboardView: View {
             if t.amount > 0 { inc += t.amount; byCat[cat, default: 0] += t.amount }
             else { exp += abs(t.amount); byCat[cat, default: 0] += abs(t.amount) }
         }
-        return MonthlySummary(month: datePreset.rawValue, total_income: inc, total_expenses: exp, net_cashflow: inc - exp, by_category: byCat)
+        return MonthlySummary(month: datePreset.label(compact: false), total_income: inc, total_expenses: exp, net_cashflow: inc - exp, by_category: byCat)
     }
 
     private var months: [MonthlySummary] {
@@ -142,6 +159,15 @@ struct DashboardView: View {
                 }
             }
             .navigationTitle("Dashboard")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Image(colorScheme == .dark ? "darkmode" : "lightmode")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 28)
+                }
+            }
             .refreshable { await load() }
             .task { await load() }
         }
@@ -162,13 +188,20 @@ struct DashboardView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
+    private var compactSegment: Bool {
+        horizontalSizeClass == .compact
+    }
+
     private var dashboardContent: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 Picker("Period", selection: $datePreset) {
-                    ForEach(DatePreset.allCases, id: \.self) { Text($0.rawValue).tag($0) }
+                    ForEach(DatePreset.allCases, id: \.self) { preset in
+                        Text(preset.label(compact: compactSegment)).tag(preset)
+                    }
                 }
                 .pickerStyle(.segmented)
+                .labelsHidden()
 
                 summaryCards
                 incomeVsExpensesChart
@@ -181,6 +214,7 @@ struct DashboardView: View {
                 recurringSection
             }
             .padding()
+            .padding(.bottom, 32)
         }
     }
 

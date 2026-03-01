@@ -76,7 +76,7 @@ export default function UploadPage() {
     setShowNewAccount(false);
   };
 
-  const acceptTypes = mode === "csv" ? ".csv" : ".png,.jpg,.jpeg,.webp";
+  const acceptTypes = mode === "csv" ? ".csv" : ".png,.jpg,.jpeg,.webp,.pdf";
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -88,8 +88,8 @@ export default function UploadPage() {
   const handleFile = (f: File) => {
     setFile(f);
     setResult(null);
-    if (f.type.startsWith("image/")) {
-      setPreview(URL.createObjectURL(f));
+    if (f.type.startsWith("image/") || f.type === "application/pdf") {
+      setPreview(f.type.startsWith("image/") ? URL.createObjectURL(f) : null);
       setMode("image");
     } else {
       setPreview(null);
@@ -118,9 +118,9 @@ export default function UploadPage() {
     const formData = new FormData();
     formData.append("file", file);
     if (selectedAccount) formData.append("account_id", selectedAccount);
-    if (file.type.startsWith("image/") && imageSubMode === "receipt") formData.append("receipt", "true");
+    if ((file.type.startsWith("image/") || file.type === "application/pdf") && imageSubMode === "receipt") formData.append("receipt", "true");
 
-    const endpoint = file.type.startsWith("image/") ? "/api/upload-image" : "/api/upload";
+    const endpoint = (file.type.startsWith("image/") || file.type === "application/pdf") ? "/api/upload-image" : "/api/upload";
 
     try {
       const res = await apiFetch(endpoint, {
@@ -340,6 +340,12 @@ export default function UploadPage() {
               />
               <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{file?.name}</p>
             </div>
+          ) : file && file.type === "application/pdf" ? (
+            <div className="space-y-2">
+              <FileText className="h-12 w-12 mx-auto text-slate-400 dark:text-slate-500" />
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{file.name}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">PDF · first page will be scanned</p>
+            </div>
           ) : (
             <>
               <div className={`mx-auto mb-4 w-12 h-12 rounded-full flex items-center justify-center ${
@@ -369,9 +375,9 @@ export default function UploadPage() {
         {file && (
           <div className="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3">
             <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
-              file.type.startsWith("image/") ? "bg-purple-100 dark:bg-purple-900/30" : "bg-blue-100 dark:bg-blue-900/30"
+              (file.type.startsWith("image/") || file.type === "application/pdf") ? "bg-purple-100 dark:bg-purple-900/30" : "bg-blue-100 dark:bg-blue-900/30"
             }`}>
-              {file.type.startsWith("image/") ? (
+              {(file.type.startsWith("image/") || file.type === "application/pdf") ? (
                 <ImageIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
               ) : (
                 <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -381,7 +387,7 @@ export default function UploadPage() {
               <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{file.name}</p>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 {(file.size / 1024).toFixed(1)} KB
-                {file.type.startsWith("image/") && " · AI vision analysis"}
+                {(file.type.startsWith("image/") || file.type === "application/pdf") && " · AI vision analysis"}
               </p>
             </div>
             <button
@@ -391,7 +397,7 @@ export default function UploadPage() {
             >
               {uploading && <Loader2 className="h-4 w-4 animate-spin" />}
               {uploading
-                ? file.type.startsWith("image/") ? "Scanning..." : "Processing..."
+                ? (file.type.startsWith("image/") || file.type === "application/pdf") ? "Scanning..." : "Processing..."
                 : "Upload & Analyze"}
             </button>
           </div>
@@ -438,10 +444,10 @@ export default function UploadPage() {
             <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">Tips for best results</h3>
             <div className="grid gap-2">
               {[
-                "Use a clear, full-screen screenshot of your transactions",
+                "Use a clear screenshot of your transactions, or upload a PDF statement",
                 "Make sure date, description, and amount columns are visible",
                 "Crop out sensitive info like account numbers if desired",
-                "Works with bank apps, credit card portals, and Venmo/Cash App",
+                "Works with bank apps, credit card portals, PDF statements, and Venmo/Cash App",
               ].map((tip, i) => (
                 <div key={i} className="flex gap-2.5 items-start">
                   <div className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0 mt-0.5">
